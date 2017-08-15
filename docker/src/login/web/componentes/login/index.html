@@ -1,0 +1,70 @@
+<div class='login-consent {{error.error}} {{error.codigo}} {{estilo}}'>
+
+  {{challenge}}
+
+  <!-- EstadoDni -->
+
+  <div class='pantalla ingrese_dni'>
+    <form ng-submit='enviarDni()'>
+      <div>Ingrese su dni</div>
+      <input type='text' name='u' ng-model='usuario'></input>
+      <button type='submit'>aceptar</button>
+    </form>
+  </div>
+
+  <div class='pantalla_error usuario_bloqueado'>
+    Su usuario ha sido bloqueado.
+    Por favor contacte con DeTiSE haciendo click <a href='#'>aqui</a>
+  </div>
+
+  <div class='pantalla_error usuario_inexistente'>
+    No tenemos registrado a ninguna persona con ese dni.
+    Si es alumno debe seguir los pasos .....
+    Si es docente debe acercarse a personal para que verifiquen el estado de sus designaciones
+    Si es no-docente debe acercarse a personal para que ...
+  </div>
+
+
+  <!-- EstadoClave -->
+
+  <div class='pantalla ingrese_clave'>
+    <form ng-submit='login()'>
+      <div>Ingrese su Clave</div>
+      <input type='password' name='p' ng-model='clave'></input>
+      <input type='hidden' readonly='true' name='u' ng-model='usuario'></input>
+      <button type='submit'>aceptar</button>
+    </form>
+  </div>
+
+  <div class='pantalla_error clave_invalida'>
+    La clave no cumple con los requerimientos mínimos de formato.
+    Por favor contacte con DeTiSE haciendo click <a href='#'>aqui</a>
+    <button ng-click='limpiarError()'>Volver</button>
+  </div>
+
+  <div class='pantalla_error demasiados_intentos'>
+    Ha ingresado su clave demasiadas veces y su usuario se ha bloqueado.
+    se a registrado el incidente y se ha enviado un informe al equipo de seguridad.
+    tambien se ha enviado un correo a la cuenta alternativa del titular informando del echo.
+    Si ha sido ud .... bla bla bla
+  </div>
+
+
+  <!-- EstadoUsuarioLogueado -->
+
+  <div class='pantalla usuario_logueado'>
+    Accedió correctamente.
+    Será redirigido en unos momentos a la aplicación correcta
+  </div>
+
+
+  <!-- errores generales -->
+
+  <div class='pantalla_error error_de_sistema'>
+    Ha ocurrido un error en el sistema.
+    Por favor intente nuevamente en unos minutos.
+    Por favor contacte con DeTiSE haciendo click <a href='#'>aqui</a>
+  </div>
+
+
+</div>
