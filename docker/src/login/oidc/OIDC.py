@@ -5,13 +5,17 @@ from pyop.storage import MongoWrapper
 from pyop.subject_identifier import HashBasedSubjectIdentifierFactory
 from pyop.userinfo import Userinfo
 
+
+IP = '192.168.0.3'
+sub_hash_salt = '32423asew'
+
 signing_key = RSAKey(key=rsa_load('/src/login/oidc/keys/server.key'), use='sig', alg='RS256')
 configuration_information = {
     'issuer': 'https://localhost',
-    'authorization_endpoint': 'https://163.10.56.57/authorization',
-    'token_endpoint': 'https://163.10.56.57/token',
-    'userinfo_endpoint': 'https://163.10.56.57/userinfo',
-    'registration_endpoint': 'https://163.10.56.57/registration',
+    'authorization_endpoint': 'http://' + IP + '/authorization',
+    'token_endpoint': 'http://' + IP + '/token',
+    'userinfo_endpoint': 'http://' + IP + '/userinfo',
+    'registration_endpoint': 'http://' + IP + '/registration',
     'response_types_supported': ['code', 'id_token token'],
     'id_token_signing_alg_values_supported': [signing_key.alg],
     'response_modes_supported': ['fragment', 'query'],
@@ -25,12 +29,26 @@ configuration_information = {
     'scopes_supported': ['openid', 'profile']
 }
 
+
+authz_codes = dict()
+access_tokens = dict()
+refresh_tokens = dict()
+subject_identifiers = dict()
+
 subject_id_factory = HashBasedSubjectIdentifierFactory(sub_hash_salt)
 authz_state = AuthorizationState(subject_id_factory,
-                                 MongoWrapper(db_uri, 'provider', 'authz_codes'),
-                                 MongoWrapper(db_uri, 'provider', 'access_tokens'),
-                                 MongoWrapper(db_uri, 'provider', 'refresh_tokens'),
-                                 MongoWrapper(db_uri, 'provider', 'subject_identifiers'))
-client_db = MongoWrapper(db_uri, 'provider', 'clients')
-user_db = MongoWrapper(db_uri, 'provider', 'users')
-provider = Provider(signing_key, configuration_information, authz_state, client_db, Userinfo(user_db))
+                                 authz_codes,
+                                 access_tokens,
+                                 refresh_tokens,
+                                 subject_identifiers)
+client_db = dict()
+user_db = dict()
+provider = Provider(signing_key, configuration_information,
+                    authz_state, client_db, Userinfo(user_db))
+
+'''
+                    authorization_code_lifetime=300,
+                    access_token_lifetime=60*60*24,
+                    refresh_token_lifetime=60*60*24*365,
+                    refresh_token_threshold=None)
+'''

@@ -3,7 +3,7 @@ logging.getLogger().setLevel(logging.DEBUG)
 logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
 import flask
-from flask import Flask, request, send_from_directory, jsonify, redirect, session, url_for
+from flask import Flask, request, send_from_directory, jsonify, redirect, session, url_for, make_response
 from flask_jsontools import jsonapi
 import flask_session
 
@@ -12,12 +12,57 @@ from login.model.exceptions import *
 
 from rest_utils import register_encoder
 
+import urllib.parse
+from pyop.exceptions import InvalidAuthenticationRequest
+from oic.oic.message import AuthorizationRequest
+from pyop.util import should_fragment_encode
+
+from .OIDC import provider
+
+
 # set the project root directory as the static folder, you can set others.
 app = Flask(__name__, static_url_path='/src/login/web')
 app.debug = True
 register_encoder(app)
 #flask_session.Session(app)
 app.config['SECRET_KEY'] = 'algo'
+
+
+''' para OIDC OP -------------------- '''
+
+@app.route('/.well-known/openid-configuration')
+def provider_config():
+    return make_response(provider.provider_configuration.to_json())
+
+@app.route('/authorization')
+def authorization_endpoints():
+    try:
+        args = urllib.parse.urlencode(flask.request.args)
+        authn_req = provider.parse_authentication_request(args, flask.request.headers)
+    except InvalidAuthenticationRequest as e:
+        logging.exception(e)
+        error_url = e.to_error_url()
+
+        if error_url:
+            return make_response(error_url, 303)
+        else:
+            return make_response("Something went wrong: {}".format(str(e)), 400)
+
+    flask.session['authn_req'] = authn_req.to_dict()
+
+    return redirect(url_for('send'), 303)
+
+
+@app.route('/finalize_auth')
+def redirection_auth_endpoint():
+    user_id = flask.session['usuario_id']
+    authn_req = flask.session['authn_req']
+    authn_response = provider.authorize(AuthorizationRequest().from_dict(authn_req), user_id)
+    return_url = authn_response.request(authn_req['redirect_uri'], should_fragment_encode(authn_req))
+    return make_response(return_url, 303)
+
+
+''' -------------------------------- '''
 
 @app.errorhandler(LoginError)
 def reset_retorar_error(error):
@@ -70,7 +115,6 @@ def verificar():
         session.close()
 
 @app.route('/login', methods=['POST'])
-@jsonapi
 def login():
     usuario = request.form.get('u', None)
     password = request.form.get('p', None)
@@ -82,8 +126,8 @@ def login():
     try:
         rusuario = LoginModel.login(session=s, usuario=usuario, clave=password)
         if rusuario:
-            flask.session['usuario'] = rusuario.usuario_id
-            return {'usuario_id': rusuario.usuario_id}
+            flask.session['usuario_id'] = rusuario.usuario_id
+            return redirect(url_for())
         else:
             raise ClaveError()
     finally:
