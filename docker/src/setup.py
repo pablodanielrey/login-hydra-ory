@@ -14,7 +14,7 @@ from setuptools import setup, find_packages
 setup(name='login-consent',
           version='0.1.0.dev0',
           description='Proyecto que maneja el equema de usuarios de los sistemas',
-          url='https://github.com/pablodanielrey/login-consent',
+          url='https://github.com/pablodanielrey/login-hydra-ory',
           author='Desarrollo DiTeSi, FCE',
           author_email='ditesi@econo.unlp.edu.ar',
           classifiers=[
@@ -36,7 +36,8 @@ setup(name='login-consent',
                             'SQLAlchemy',
                             'google-api-python-client',
                             'httplib2',
-                            'pyjwt'],
+                            'pyjwt',
+                            'pyop'],
           entry_points={
             'console_scripts': [
                 'wamp=login.api.wamp.main:main',

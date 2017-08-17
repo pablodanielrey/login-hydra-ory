@@ -1,0 +1,35 @@
+.header {
+    background-color: #222;
+    border-color: #080808;
+}
+
+.header .navbar-brand {
+  text-decoration: none;
+  text-shadow: 0;
+  padding: 0px 0px;
+
+
+}
+
+.header a, a:hover {
+    color: #9d9d9d;
+    text-decoration: none;
+}
+
+.header nav>li>a:focus, .nav>li>a:hover {
+    text-decoration: none;
+     background-color: #2d2d2d;
+   }
+
+
+.header .menuLeft {
+ display:flex;
+ flex-direction: row;
+ align-items: center;
+}
+
+
+
+.header .icoHeader {
+  margin: 0 10px 0 18px;
+}
