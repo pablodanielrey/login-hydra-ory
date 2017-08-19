@@ -41,7 +41,10 @@ authz_state = AuthorizationState(subject_id_factory,
                                  access_tokens,
                                  refresh_tokens,
                                  subject_identifiers)
-client_db = dict()
+client_db = {'some-consumer':{
+        'redirect_uris':['http://192.168.0.3:7000/oidc_callback', 'http://127.0.0.1:7000/oidc_callback'],
+        'response_types': ['code', 'id_token token']
+        }}
 user_db = dict()
 provider = Provider(signing_key, configuration_information,
                     authz_state, client_db, Userinfo(user_db))
