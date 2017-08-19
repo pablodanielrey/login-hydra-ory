@@ -1,6 +1,7 @@
 import logging
 logging.getLogger().setLevel(logging.DEBUG)
 logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 import flask
 from flask import Flask, request, send_from_directory, jsonify, redirect, session, url_for, make_response
@@ -14,14 +15,22 @@ from rest_utils import register_encoder
 
 import urllib.parse
 from pyop.exceptions import InvalidAuthenticationRequest
+from pyop.exceptions import InvalidClientAuthentication
+from pyop.exceptions import OAuthError
 from oic.oic.message import AuthorizationRequest
-from pyop.util import should_fragment_encode
+from oic.oic.message import TokenErrorResponse
 
+
+
+# uso should_fragment_encode pero parcheada de mi codigo
+#from pyop.util import should_fragment_encode
+#
+from .OIDC import should_fragment_encode
 from .OIDC import provider
 
 
 # set the project root directory as the static folder, you can set others.
-app = Flask(__name__, static_url_path='/src/login/web')
+app = Flask(__name__, static_url_path='/src/login/oidc')
 app.debug = True
 register_encoder(app)
 #flask_session.Session(app)
@@ -49,17 +58,73 @@ def authorization_endpoints():
             return make_response("Something went wrong: {}".format(str(e)), 400)
 
     flask.session['authn_req'] = authn_req.to_dict()
-
     return redirect(url_for('send'), 303)
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    usuario = request.form.get('u', None)
+    password = request.form.get('p', None)
+
+    if not usuario or not password:
+        raise ClaveError()
+
+    s = Session()
+    try:
+        rusuario = LoginModel.login(session=s, usuario=usuario, clave=password)
+        if rusuario:
+            flask.session['usuario_id'] = rusuario.usuario_id
+            return redirect(url_for('redirection_auth_endpoint'))
+        else:
+            raise ClaveError()
+    finally:
+        s.close()
 
 
 @app.route('/finalize_auth')
 def redirection_auth_endpoint():
     user_id = flask.session['usuario_id']
     authn_req = flask.session['authn_req']
+    logging.debug(user_id)
+    logging.debug(authn_req)
+
     authn_response = provider.authorize(AuthorizationRequest().from_dict(authn_req), user_id)
+    logging.debug(authn_response)
+    logging.debug(should_fragment_encode(authn_req))
     return_url = authn_response.request(authn_req['redirect_uri'], should_fragment_encode(authn_req))
-    return make_response(return_url, 303)
+
+    logging.debug('------------------------------')
+    logging.debug(return_url)
+    logging.debug('------------------------------')
+
+    return redirect(return_url, 303)
+
+
+
+@app.route('/token', methods=['POST', 'GET'])
+def token_endpoint():
+    try:
+        '''
+        args = urllib.parse.urlencode(flask.request.args)
+        '''
+        logging.debug(request.get_data().decode('utf-8'))
+        logging.debug(request.headers)
+        token_response = provider.handle_token_request(request.get_data().decode('utf-8'), flask.request.headers)
+        return token_response.to_json()
+    except InvalidClientAuthentication as e:
+        logging.exception(e)
+        error_resp = TokenErrorResponse(error='invalid_client', error_description=str(e))
+        http_response = make_response(error_resp.to_json())
+        http_response.status_code = 401
+        http_response.headers['WWW-Authenticate'] = 'Basic realm=login'
+        return http_response
+    except OAuthError as e:
+        error_resp = TokenErrorResponse(error=e.oauth_error, error_description=str(e))
+        return error_resp.to_json(), 400
+
+
+
+
 
 
 ''' -------------------------------- '''
@@ -72,7 +137,7 @@ def reset_retorar_error(error):
 @app.route('/<path:path>', methods=['GET'])
 def send(path):
     if not path:
-        return redirect('/index.html'), 303
+        return redirect('/login.html'), 303
     return send_from_directory(app.static_url_path, path)
 
 
@@ -114,24 +179,7 @@ def verificar():
     finally:
         session.close()
 
-@app.route('/login', methods=['POST'])
-def login():
-    usuario = request.form.get('u', None)
-    password = request.form.get('p', None)
 
-    if not usuario or not password:
-        raise ClaveError()
-
-    s = Session()
-    try:
-        rusuario = LoginModel.login(session=s, usuario=usuario, clave=password)
-        if rusuario:
-            flask.session['usuario_id'] = rusuario.usuario_id
-            return redirect(url_for())
-        else:
-            raise ClaveError()
-    finally:
-        s.close()
 
 ''' ------------------------------------------------------------------ '''
 

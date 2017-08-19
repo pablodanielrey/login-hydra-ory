@@ -42,12 +42,30 @@ authz_state = AuthorizationState(subject_id_factory,
                                  refresh_tokens,
                                  subject_identifiers)
 client_db = {'some-consumer':{
-        'redirect_uris':['http://192.168.0.3:7000/oidc_callback', 'http://127.0.0.1:7000/oidc_callback'],
-        'response_types': ['code', 'id_token token']
-        }}
-user_db = dict()
+                'client_secret': 'consumer-secret',
+                'redirect_uris':['http://192.168.0.3:7000/oidc_callback', 'http://127.0.0.1:7000/oidc_callback'],
+                'response_types': ['code', 'id_token token'],
+                'token_endpoint_auth_method':'client_secret_post'
+                }
+            }
+user_db = {
+            '89d88b81-fbc0-48fa-badb-d32854d3d93a': {
+                'sub':'Pablo Rey',
+                'state':'sdfdsfds'
+            }
+        }
 provider = Provider(signing_key, configuration_information,
                     authz_state, client_db, Userinfo(user_db))
+
+
+def should_fragment_encode(authn_req):
+    ''' error en la función de pyop asi que la parcheo aca y la defino hasta poder resolverlo mejor '''
+    if authn_req['response_type'] == 'code':
+        return False
+    if authn_req['response_type'] == ['code']:
+        return False
+    return True
+
 
 '''
                     authorization_code_lifetime=300,
