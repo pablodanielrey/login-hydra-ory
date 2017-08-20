@@ -1,3 +1,5 @@
+import logging
+
 from jwkest.jwk import rsa_load, RSAKey
 from pyop.authz_state import AuthorizationState
 from pyop.provider import Provider

@@ -16,10 +16,13 @@ from rest_utils import register_encoder
 import urllib.parse
 from pyop.exceptions import InvalidAuthenticationRequest
 from pyop.exceptions import InvalidClientAuthentication
+from pyop.exceptions import InvalidAccessToken
 from pyop.exceptions import OAuthError
+from pyop.exceptions import BearerTokenError
+from pyop.access_token import AccessToken
 from oic.oic.message import AuthorizationRequest
 from oic.oic.message import TokenErrorResponse
-
+from oic.oic.message import UserInfoErrorResponse
 
 
 # uso should_fragment_encode pero parcheada de mi codigo
@@ -99,16 +102,12 @@ def redirection_auth_endpoint():
 
     return redirect(return_url, 303)
 
-
-
 @app.route('/token', methods=['POST', 'GET'])
 def token_endpoint():
     try:
         '''
         args = urllib.parse.urlencode(flask.request.args)
         '''
-        logging.debug(request.get_data().decode('utf-8'))
-        logging.debug(request.headers)
         token_response = provider.handle_token_request(request.get_data().decode('utf-8'), flask.request.headers)
         return token_response.to_json()
     except InvalidClientAuthentication as e:
@@ -122,7 +121,17 @@ def token_endpoint():
         error_resp = TokenErrorResponse(error=e.oauth_error, error_description=str(e))
         return error_resp.to_json(), 400
 
-
+@app.route('/userinfo', methods=['GET', 'POST'])
+def userinfo_endpoint():
+    try:
+        response = provider.handle_userinfo_request(request.get_data().decode('utf-8'), request.headers)
+        return response.to_json()
+    except (BearerTokenError, InvalidAccessToken) as e:
+        error_resp = UserInfoErrorResponse(error='invalid_token', error_description=str(e))
+        http_response = make_response(error_resp.to_json())
+        http_response.status_code = 401
+        http_response.headers['WWW-Authenticate'] = AccessToken.BEARER_TOKEN_TYPE
+        return http_response
 
 
 
