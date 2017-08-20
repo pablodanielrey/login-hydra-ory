@@ -1,4 +1,5 @@
 import logging
+import datetime
 
 from jwkest.jwk import rsa_load, RSAKey
 from pyop.authz_state import AuthorizationState
@@ -32,10 +33,45 @@ configuration_information = {
 }
 
 
-authz_codes = dict()
-access_tokens = dict()
-refresh_tokens = dict()
-subject_identifiers = dict()
+class DictWrapper(object):
+    def __init__(self, name, d=None):
+        self.name = name
+        if d:
+            self.data = dict(d)
+        else:
+            self.data = dict()
+
+    def __setitem__(self, key, value):
+        logging.debug('{} --- setitem {} --> {}'.format(self.name, key, value))
+        self.data[key] = value
+
+    def __getitem__(self, key):
+        v = self.data[key]
+        logging.debug('{} --- getitem {} --> {}'.format(self.name, key, v))
+        return v
+
+    def __delitem__(self, key):
+        logging.debug('{} --- delitem {}'.format(self.name, key))
+        del self.data[key]
+
+    def __contains__(self, key):
+        logging.debug('{} --- contains {}'.format(self.name, key))
+        return key in self.data
+
+    def items(self):
+        logging.debug('{} ---  items --'.format(self.name))
+        return self.data.items()
+
+    def pop(self, key, default=None):
+        v = self.data.pop(key)
+        logging.debug('{} --- pop {} --> {}'.format(self.name, key, v))
+        return v
+
+
+authz_codes = DictWrapper('authz_codes')
+access_tokens = DictWrapper('access_tokens')
+refresh_tokens = DictWrapper('refresh_tokens')
+subject_identifiers = DictWrapper('subject_identifiers')
 
 subject_id_factory = HashBasedSubjectIdentifierFactory(sub_hash_salt)
 authz_state = AuthorizationState(subject_id_factory,
@@ -43,19 +79,38 @@ authz_state = AuthorizationState(subject_id_factory,
                                  access_tokens,
                                  refresh_tokens,
                                  subject_identifiers)
-client_db = {'some-consumer':{
+client_db = DictWrapper('client_db',
+            {'some-consumer':{
                 'client_secret': 'consumer-secret',
                 'redirect_uris':['http://192.168.0.3:7000/oidc_callback', 'http://127.0.0.1:7000/oidc_callback'],
                 'response_types': ['code', 'id_token token'],
                 'token_endpoint_auth_method':'client_secret_post'
                 }
-            }
-user_db = {
+            })
+
+#https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
+user_db = DictWrapper('user_db',
+        {
             '89d88b81-fbc0-48fa-badb-d32854d3d93a': {
-                'sub':'Pablo Rey',
-                'state':'sdfdsfds'
+                'sub':'89d88b81-fbc0-48fa-badb-d32854d3d93a',
+                'email': 'pablo.rey@econo.unlp.edu.ar',
+                'email_verified': True,
+                'phone_number': '4237467',
+                'phone_number_verified': False,
+                'name':'Pablo Daniel',
+                'given_name': 'Pablo Daniel Rey',
+                'family_name':'Rey',
+                'picture': 'http://192.168.0.3:9000/files/api/v1.0/archivo/6456hgv75756hg7667',
+                'gender': 'Masculino',
+                'birdthdate': datetime.datetime.now().date(),
+                'address': {
+                    'address': 'calle 5 y la plata'
+                },
+                'dni':'27294557',
+
+                'legajo':None
             }
-        }
+        })
 provider = Provider(signing_key, configuration_information,
                     authz_state, client_db, Userinfo(user_db))
 

@@ -1,7 +1,7 @@
 import logging
 logging.getLogger().setLevel(logging.DEBUG)
-logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
-logging.basicConfig(level=logging.DEBUG)
+#logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+#logging.basicConfig(level=logging.DEBUG)
 
 import flask
 from flask import Flask, request, send_from_directory, jsonify, redirect, session, url_for, make_response
@@ -115,24 +115,45 @@ def token_endpoint():
         error_resp = TokenErrorResponse(error='invalid_client', error_description=str(e))
         http_response = make_response(error_resp.to_json())
         http_response.status_code = 401
-        http_response.headers['WWW-Authenticate'] = 'Basic realm=login'
+        http_response.headers['WWW-Authenticate'] = 'Basic realm=oidc'
         return http_response
     except OAuthError as e:
         error_resp = TokenErrorResponse(error=e.oauth_error, error_description=str(e))
         return error_resp.to_json(), 400
 
-@app.route('/userinfo', methods=['GET', 'POST'])
+
+@app.route('/userinfo', methods=['POST'])
 def userinfo_endpoint():
     try:
+        logging.debug('userinfo')
+        logging.debug(request.get_data())
         response = provider.handle_userinfo_request(request.get_data().decode('utf-8'), request.headers)
+        logging.debug(response)
         return response.to_json()
     except (BearerTokenError, InvalidAccessToken) as e:
         error_resp = UserInfoErrorResponse(error='invalid_token', error_description=str(e))
         http_response = make_response(error_resp.to_json())
         http_response.status_code = 401
-        http_response.headers['WWW-Authenticate'] = AccessToken.BEARER_TOKEN_TYPE
+        http_response.headers['WWW-Authenticate'] = AccessToken.BEARER_TOKEN_TYPE + ' realm=oidc'
+        logging.info(str(http_response))
         return http_response
 
+@app.route('/userinfo', methods=['GET'])
+def userinfo_endpoint_get():
+    try:
+        logging.debug('userinfo')
+        logging.debug(request.args)
+        args = urllib.parse.urlencode(flask.request.args)
+        response = provider.handle_userinfo_request(args, request.headers)
+        logging.debug(response)
+        return response.to_json()
+    except (BearerTokenError, InvalidAccessToken) as e:
+        error_resp = UserInfoErrorResponse(error='invalid_token', error_description=str(e))
+        http_response = make_response(error_resp.to_json())
+        http_response.status_code = 401
+        http_response.headers['WWW-Authenticate'] = AccessToken.BEARER_TOKEN_TYPE + ' realm=oidc'
+        logging.info(str(http_response))
+        return http_response
 
 
 
