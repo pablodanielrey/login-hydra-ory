@@ -16,14 +16,15 @@ from .entities import *
 
 class LoginModel:
 
-    HYDRA_CLAVE = os.environ['HYDRA_CLAVE']
+    #HYDRA_CLAVE = os.environ['HYDRA_CLAVE']
 
+    '''
     @classmethod
     def verificar_challenge(cls, challenge):
         token = jwt.decode(challenge, cls.HYDRA_CLAVE)
         url = token['redir']
         return url
-
+    '''
     @staticmethod
     def _aplicar_filtros_comunes(q, offset, limit):
         q = q.offset(offset) if offset else q

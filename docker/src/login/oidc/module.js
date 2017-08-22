@@ -3,7 +3,6 @@ app = angular.module('MainApp', ['ngRoute', 'ngResource'])
 app.config(['$routeProvider', function($routeProvider) {
 
   $routeProvider
-    .when('/login/:challenge', {templateUrl: '/componentes/login/index.html', controller:'LoginCtrl'})
     .when('/login', {templateUrl: '/componentes/login/index.html', controller:'LoginCtrl'})
     .otherwise({ redirectTo: '/login' });
 

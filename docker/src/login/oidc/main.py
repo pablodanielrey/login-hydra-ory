@@ -167,48 +167,8 @@ def reset_retorar_error(error):
 @app.route('/<path:path>', methods=['GET'])
 def send(path):
     if not path:
-        return redirect('/login.html'), 303
+        return redirect('/index.html'), 303
     return send_from_directory(app.static_url_path, path)
-
-
-@app.route('/consent', methods=['GET'])
-def hydra_consent():
-    error = request.args.get('error', None)
-    error_description = request.args.get('error_description', None)
-
-    if error or error_description:
-        r = jsonify({'error':error, 'error_description':error_description})
-        return r, 500
-
-    challenge = request.args.get('challenge', None, str)
-    if not challenge:
-        raise SeguridadError()
-
-    app.open_session(request)
-    usuario = flask.session.get('usuario',None)
-    if usuario:
-        redireccion = LoginModel.verificar_challenge(challenge)
-        return redirect(redireccion,303)
-    else:
-        redireccion = '/index.html#!login/' + challenge
-        return redirect(redireccion, 303)
-
-
-''' ------------ métodos para implementar la pantalla de login ----- '''
-
-@app.route('/verificar', methods=['POST'])
-@jsonapi
-def verificar():
-    dni = request.form.get('u', None)
-    if not dni:
-        raise UsuarioNoEncontradoError()
-
-    session = Session()
-    try:
-        return LoginModel.obtener_usuario(session=session, dni=dni)
-    finally:
-        session.close()
-
 
 
 ''' ------------------------------------------------------------------ '''

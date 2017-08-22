@@ -1,5 +1,9 @@
-body {
+html, body {
   margin: 0 !important;
-     padding: 0 !important;
-font-family: 'Open Sans', sans-serif;
+  padding: 0 !important;
+  height: 100%;
+  width: 100%;
+  background: blue;
+  font-family: 'Open Sans', sans-serif;
+  /*overflow: hidden;*/
 }
