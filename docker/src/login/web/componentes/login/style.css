@@ -1,37 +1,57 @@
 
-.login-consent > div {
+.login > div {
   display: none;
 }
 
-.login-consent.EstadoDni .ingrese_dni {
-  display: block;
-}
-
-.login-consent.EstadoDni.error.UsuarioNoEncontradoError .usuario_inexistente {
-  display: block;
-}
-
-.login-consent.EstadoDni.error.SeguridadError .usuario_bloqueado {
-  display: block;
-}
-
-
-.login-consent.EstadoClave .ingrese_clave {
-  display: block;
-}
-
-.login-consent.EstadoClave.error.ClaveError .clave_invalida {
-  display: block;
-}
-
-.login-consent.EstadoClave.error.SeguridadError .demasiados_intentos {
-  display: block;
-}
-
-.login-consent.EstadoUsuarioLogueado .usuario_logueado {
-  display: block;
-}
-
-.login-consent.error .pantalla {
+.login .contenedorErrores > div {
   display: none;
 }
+
+.login.error .contenedorErrores {
+  display: flex;
+}
+
+.login.Estado_Login .contenedorLogin {
+  display: flex;
+}
+
+.login.Estado_Redireccionando .contenedorRedireccionando {
+  display: flex;
+}
+
+.login.error .pantalla {
+  display: none;
+}
+
+
+.login.error.ErrorUsuarioBloqueado .usuario_bloqueado {
+  display: flex;
+}
+
+.login.error.ErrorUsuarioInexistente .usuario_inexistente {
+  display: flex;
+}
+
+
+/*----- estilos de la pantalla --*/
+
+.login .pantalla {
+  width: 100%;
+  height: 100vh;
+  background-color: green;
+}
+
+.login .pantalla_error {
+  width: 100%;
+  height: 100vh;
+  background-color: red;
+}
+
+
+/*
+@media screen and (min-height: 900px) {
+  .login {
+    width: 100%;
+    height: 1080px;
+  }
+}*/

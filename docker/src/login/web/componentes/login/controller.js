@@ -2,15 +2,15 @@
 app.controller("LoginCtrl", ["$scope", "$location", "$routeParams", "$resource", "$timeout","$http", function ($scope, $location, $routeParams, $resource, $timeout, $http) {
 
   // -------------- manejo de pantallas y errores ------------------------------------------------------ //
-  $scope.$parent.estilos = ['EstadoDni','EstadoClave','EstadoUsuarioLogueado'];
+  $scope.$parent.errores_posibles = ['ErrorUsuarioBloqueado','ErrorUsuarioInexistente'];
+  $scope.$parent.mensajes = [];
+
+  $scope.$parent.estados = ['Estado_Login','Estado_Redireccionando'];
   $timeout(function() {
-    $scope.$parent.estilo = 'EstadoDni';
+    $scope.$parent.estado = 'Estado_Login';
+    $scope.$parent.mensaje = {mensaje:'', codigo:''};
   });
-  $scope.$parent.errores_posibles = ['ClaveError','UsuarioNoEncontradoError','SeguridadError'];
   //////////////////
-
-
-  $scope.challenge = $routeParams['challenge'];
 
 
   /*

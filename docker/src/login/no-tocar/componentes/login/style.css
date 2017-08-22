@@ -1,0 +1,37 @@
+
+.login-consent > div {
+  display: none;
+}
+
+.login-consent.EstadoDni .ingrese_dni {
+  display: block;
+}
+
+.login-consent.EstadoDni.error.UsuarioNoEncontradoError .usuario_inexistente {
+  display: block;
+}
+
+.login-consent.EstadoDni.error.SeguridadError .usuario_bloqueado {
+  display: block;
+}
+
+
+.login-consent.EstadoClave .ingrese_clave {
+  display: block;
+}
+
+.login-consent.EstadoClave.error.ClaveError .clave_invalida {
+  display: block;
+}
+
+.login-consent.EstadoClave.error.SeguridadError .demasiados_intentos {
+  display: block;
+}
+
+.login-consent.EstadoUsuarioLogueado .usuario_logueado {
+  display: block;
+}
+
+.login-consent.error .pantalla {
+  display: none;
+}
