@@ -42,7 +42,7 @@ setup(name='login-consent',
             'console_scripts': [
                 'wamp=login.api.wamp.main:main',
                 'rest=login.api.rest.main:main',
-                'flask=login.oidc.main:main'
+                'flask=login.web.main:main'
             ]
           }
 
