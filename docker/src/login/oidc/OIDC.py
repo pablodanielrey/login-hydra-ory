@@ -104,7 +104,11 @@ user_db = DictWrapper('user_db',
                 'gender': 'Masculino',
                 'birdthdate': datetime.datetime.now().date(),
                 'address': {
-                    'address': 'calle 5 y la plata'
+                    "street_address": "1234 Hollywood Blvd.",
+                    "locality": "Los Angeles",
+                    "region": "CA",
+                    "postal_code": "90210",
+                    "country": "US"
                 },
                 'dni':'27294557',
 
