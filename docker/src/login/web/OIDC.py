@@ -12,7 +12,7 @@ from pyop.userinfo import Userinfo
 IP = '192.168.0.3'
 sub_hash_salt = '32423asew'
 
-signing_key = RSAKey(key=rsa_load('/src/login/oidc/keys/server.key'), use='sig', alg='RS256')
+signing_key = RSAKey(key=rsa_load('/src/login/web/keys/server.key'), use='sig', alg='RS256')
 configuration_information = {
     'issuer': 'https://localhost',
     'authorization_endpoint': 'http://' + IP + '/authorization',
