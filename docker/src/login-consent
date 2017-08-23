@@ -1,0 +1,13 @@
+PYTHONPATH=./libs:./
+USERS_DB_USER=dcsys
+USERS_DB_PASSWORD=dcsys
+USERS_DB_HOST=usuariosdb.econo.unlp.edu.ar
+USERS_DB_NAME=dcsys
+HOME=/root
+LOGIN_DB_USER=login
+LOGIN_DB_NAME=login
+LOGIN_DB_PASSWORD=d3f2091abd184ffa99dbf548a43728df
+LOGIN_DB_HOST=logindb.econo.unlp.edu.ar
+LOGIN_OIDC_URL=http://login.econo.unlp.edu.ar:5000
+LOGIN_OIDC_ISSUER=https://login.econo.unlp.edu.ar
+HASH_SALT=ksdfkl9jf4903fjefj490fj43

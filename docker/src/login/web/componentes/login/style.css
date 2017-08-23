@@ -46,7 +46,7 @@
 .login .pantalla {
   width: 100%;
   height: 100vh;
-  background-color: green;
+  /*background-color: green;*/
 }
 
 .login .pantalla_error {
@@ -54,6 +54,117 @@
   height: 100vh;
   background-color: red;
 }
+
+/*$images: ('/img/imagen1.jpg', '/img/imagen2.jpg',  '/img/imagen3.jpg');
+
+$img: nth($images, random(length($images)));*/
+
+.login .contenedorLogin, .contenedorRedireccionando {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+display: -webkit-flex;
+display: -moz-flex;
+-webkit-align-items: center;
+-moz-align-items: center;
+background: none;
+  background-image: url(/img/imagen1.jpg);
+  /*background: url($img) top center no-repeat;*/
+  /*background-color: red !important;*/
+}
+
+
+
+.login .tamanoLogin {
+  border: 10px solid;
+  border-color: rgba(255, 255, 255, 0.3);
+  border-radius: 0.3em;
+  width: 300px;
+  height: 400px;
+  margin-left: 15%;
+
+}
+
+.login .subContenedorLogin {
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  background-color: white;
+}
+
+.login .btnAcceder {
+  width: 100%;
+  background-image: -webkit-linear-gradient(top,#0069A6 0,#265a88 100%);
+      background-image: -o-linear-gradient(top,#0069A6 0,#265a88 100%);
+      background-image: -webkit-gradient(linear,left top,left bottom,from(#337ab7),to(#265a88));
+      background-image: linear-gradient(to bottom,#0069A6 0,#265a88 100%);
+      filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff337ab7', endColorstr='#ff265a88', GradientType=0);
+      filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+      background-repeat: repeat-x;
+      border-color: #245580;
+}
+
+.login .btnAcceder:hover {
+      background-image: -webkit-linear-gradient(top,#083e66 0,#265a88 100%);
+      background-image: -o-linear-gradient(top,#083e66 0,#265a88 100%);
+      background-image: -webkit-gradient(linear,left top,left bottom,from(#083e66),to(#265a88));
+      background-image: linear-gradient(to bottom,#083e66 0,#265a88 100%);
+      filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff337ab7', endColorstr='#ff265a88', GradientType=0);
+      filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+      background-repeat: repeat-x;
+      border-color: #245580;
+}
+
+.login .footerLogin {
+  display: flex;
+  display: -webkit-flex;
+  display: -moz-flex;
+  align-items: center;
+  -webkit-align-items: center;
+  -moz-align-items: center;
+  justify-content: space-around;
+  -webkit-justify-content: space-around;
+  -moz-justify-content: space-around;
+  flex-direction: row;
+  -webkit-flex-direction: row;
+  -moz-flex-direction: row;
+  color: grey;
+  font-size: 10px;
+}
+
+.login .linkAyuda {
+  /*color: #3B3D43;*/
+}
+
+
+.login .subContenedorLoginRedireccionando {
+  display: flex;
+  display: -webkit-flex;
+  display: -moz-flex;
+  flex-direction: column;
+  flex-direction: column;
+  flex-direction: column;
+  align-items: center;
+  -webkit-align-items: center;
+  -moz-align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  background-color: white;
+}
+
+.login .imgAvatar {
+  width: 200px;
+}
+
+.login .imgCargando {
+  width: 90px;
+}
+
+.login .nombreUsuario {
+  font-size: 40px;
+}
+
 
 
 /*

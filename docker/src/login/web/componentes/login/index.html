@@ -3,16 +3,30 @@
   <!-- EstadoLogin -->
 
   <div class='pantalla contenedorLogin'>
-
-      <form ng-submit='login()'>
-        <div>Ingrese sus Datos</div>
-        Usuario<input type='text' name='u' ng-model='usuario'></input>
-        Clave<input type='password' name='p' ng-model='clave'>
-        <button type='submit'>aceptar</button>
-      </form>
-
-
+      <div class=tamanoLogin>
+          <div class="subContenedorLogin">
+              <div>
+                <img src="img/logo_fce.png"></img>
+              </div><hr>
+              <div>
+                  <div>Sistema de Usuarios FCE</div><br>
+                      <form ng-submit='login()'>
+                        <div class="form-group"><input type='text' name='u' class="form-control" placeholder="Ingrese DNI" ng-model='usuario'></input></div>
+                        <div class="form-group"><input type='password' name='p' class="form-control" placeholder="Contraseña" ng-model='clave'></input></div>
+                        <button type='submit' class="btn btn-primary btnAcceder">Acceder</button>
+                      </form>
+              </div><hr>
+              <div class="footerLogin">
+                  <div>
+                      <a class="linkAyuda" href=""> ¿Olvidaste tu contraseña?</a><br>
+                      <a class="linkAyuda" href=""> ¿No puedes acceder?</a>
+                  </div>
+                  <div><img src="img/logo_unlp.png"></img></div>
+              </div>
+          </div>
+      </div>
   </div>
+
 
 
   <div class='pantalla_error contenedorErrores'>
@@ -45,10 +59,20 @@
   <!-- EstadoRedireccionando -->
 
   <div class='pantalla contenedorRedireccionando'>
+    <div class=tamanoLogin>
+        <div class="subContenedorLoginRedireccionando">
+            <div>
+              <img class="imgAvatar" src="img/avatar.png"></img>
+              {{usuario.foto}}
+            </div><br>
+            <div>Bienvenido</div>
+            <div class="nombreUsuario">Walter {{usuario.nombre}}</div>
+            <div>
+              <img class="imgCargando" src="img/preloader.gif"></img>
+            </div>
+        </div>
+    </div>
     <div>
-      {{usuario.foto}}
-      Bienvenido {{usuario.nombre}} {{usuario.apellido}}
-      Será ....
     </div>
   </div>
 
