@@ -30,6 +30,7 @@ from oic.oic.message import UserInfoErrorResponse
 #
 from .OIDC import should_fragment_encode
 from .OIDC import provider
+from .OIDC import user_db
 
 
 # set the project root directory as the static folder, you can set others.
@@ -87,7 +88,8 @@ def login():
         if rusuario:
             flask.session['usuario_id'] = rusuario.usuario_id
             #return redirect(url_for('redirection_auth_endpoint'))
-            return {'url': url_for('redirection_auth_endpoint')}, 200
+            usuario = user_db[rusuario.usuario_id]
+            return {'url': url_for('redirection_auth_endpoint'), 'usuario':usuario}, 200
         else:
             raise ClaveError()
     finally:

@@ -38,10 +38,15 @@ app.controller("LoginCtrl", ["$scope", "$location", "$routeParams", "$resource",
     $scope._postData('/login', {'u':$scope.usuario, 'p':$scope.clave})
             .then(function(data) {
                 console.log(data);
-                $scope.$parent.estadoSiguiente();
+                // $scope.usuario = data.data.usuario;
+                // $scope.$parent.estadoSiguiente();
+                // $timeout(function() {
+                //   $window.location.href = data.data.url;
+                // },1500);
                 $timeout(function() {
-                  $window.location.href = data.data.url;
-                },0);
+                   $window.location.href = data.data.url;
+                });
+
              }).catch(function(data) {
                console.log(data);
                if (data.data == null) {
