@@ -24,11 +24,15 @@
 }
 
 
-.login.error.ErrorUsuarioBloqueado .usuario_bloqueado {
+.login.error.SeguridadError .seguridad_error {
   display: flex;
 }
 
-.login.error.ErrorUsuarioInexistente .usuario_inexistente {
+.login.error.UsuarioBloqueadoError .usuario_bloqueado {
+  display: flex;
+}
+
+.login.error.UsuarioInexistenteError .usuario_inexistente {
   display: flex;
 }
 

@@ -36,8 +36,10 @@ from .OIDC import provider
 app = Flask(__name__, static_url_path='/src/login/web')
 app.debug = True
 register_encoder(app)
+app.debug = True
+app.config['SECRET_KEY'] = 'algo-secreto2'
+app.config['SESSION_COOKIE_NAME'] = 'oidc_session'
 #flask_session.Session(app)
-app.config['SECRET_KEY'] = 'algo'
 
 
 ''' para OIDC OP -------------------- '''
@@ -66,6 +68,11 @@ def authorization_endpoints():
 
 @app.route('/login', methods=['POST'])
 def login():
+
+    authn_req = flask.session.get('authn_req', None)
+    if not authn_req:
+        raise SeguridadError()
+
     usuario = request.form.get('u', None)
     password = request.form.get('p', None)
 

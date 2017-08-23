@@ -2,7 +2,7 @@
 app.controller("LoginCtrl", ["$scope", "$location", "$routeParams", "$resource", "$timeout","$http", function ($scope, $location, $routeParams, $resource, $timeout, $http) {
 
   // -------------- manejo de pantallas y errores ------------------------------------------------------ //
-  $scope.$parent.errores_posibles = ['ErrorUsuarioBloqueado','ErrorUsuarioInexistente'];
+  $scope.$parent.errores_posibles = ['UsuarioBloqueadoError','UsuarioInexistenteError','SeguridadError'];
   $scope.$parent.mensajes = [];
 
   $scope.$parent.estados = ['Estado_Login','Estado_Redireccionando'];

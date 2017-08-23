@@ -6,7 +6,7 @@
 
       <form ng-submit='login()'>
         <div>Ingrese sus Datos</div>
-        Usuario<input type='text' readonly='true' name='u' ng-model='usuario'></input>
+        Usuario<input type='text' name='u' ng-model='usuario'></input>
         Clave<input type='password' name='p' ng-model='clave'>
         <button type='submit'>aceptar</button>
       </form>
@@ -33,6 +33,11 @@
       Ha ocurrido un error de sistema.
       si persiste para contactarse con DiTESI <a href='#'>aqui</a>
       <button>volver</button>
+    </div>
+
+    <div class='pantalla_error seguridad_error'>
+      No se permite acceder a este sitio directamente.
+      Si cree que esto es un error y desea comunicarse con DiTeSI puede hacerlo haciendo click <a href='#'>aqui</a>
     </div>
 
   </div>

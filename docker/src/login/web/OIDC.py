@@ -1,3 +1,4 @@
+import os
 import logging
 import datetime
 
@@ -9,16 +10,16 @@ from pyop.subject_identifier import HashBasedSubjectIdentifierFactory
 from pyop.userinfo import Userinfo
 
 
-IP = '192.168.0.3'
-sub_hash_salt = '32423asew'
+LOGIN_URL = os.environ['LOGIN_URL']
+sub_hash_salt = os.environ['HASH_SALT']
 
 signing_key = RSAKey(key=rsa_load('/src/login/web/keys/server.key'), use='sig', alg='RS256')
 configuration_information = {
     'issuer': 'https://localhost',
-    'authorization_endpoint': 'http://' + IP + '/authorization',
-    'token_endpoint': 'http://' + IP + '/token',
-    'userinfo_endpoint': 'http://' + IP + '/userinfo',
-    'registration_endpoint': 'http://' + IP + '/registration',
+    'authorization_endpoint': LOGIN_URL + '/authorization',
+    'token_endpoint': LOGIN_URL + '/token',
+    'userinfo_endpoint': LOGIN_URL + '/userinfo',
+    'registration_endpoint': LOGIN_URL + '/registration',
     'response_types_supported': ['code', 'id_token token'],
     'id_token_signing_alg_values_supported': [signing_key.alg],
     'response_modes_supported': ['fragment', 'query'],
@@ -82,7 +83,7 @@ authz_state = AuthorizationState(subject_id_factory,
 client_db = DictWrapper('client_db',
             {'some-consumer':{
                 'client_secret': 'consumer-secret',
-                'redirect_uris':['http://192.168.0.3:7000/oidc_callback', 'http://127.0.0.1:7000/oidc_callback'],
+                'redirect_uris':['http://usuarios.econo.unlp.edu.ar:5005/oidc_callback'],
                 'response_types': ['code', 'id_token token'],
                 'token_endpoint_auth_method':'client_secret_post'
                 }
