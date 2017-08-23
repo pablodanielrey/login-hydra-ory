@@ -176,6 +176,17 @@ def reset_retorar_error(error):
 @app.route('/', methods=['GET'], defaults={'path':None})
 @app.route('/<path:path>', methods=['GET'])
 def send(path):
+
+    """
+        para agregar el chequeo de que tienen que pedir si o si el endpoint de autorizacion primero.
+        lo agreguo cuando este en producción, asi walter puede estilar las pantallas
+
+    authn_req = flask.session.get('authn_req', None)
+    if not authn_req:
+        ''' aca debería redireccionar al sitio por defecto, pero por ahora tiro un error de seguridad '''
+        raise SeguridadError()
+    """
+
     if not path:
         return redirect('/index.html'), 303
     return send_from_directory(app.static_url_path, path)

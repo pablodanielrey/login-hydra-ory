@@ -10,16 +10,17 @@ from pyop.subject_identifier import HashBasedSubjectIdentifierFactory
 from pyop.userinfo import Userinfo
 
 
-LOGIN_URL = os.environ['LOGIN_URL']
+LOGIN_OIDC_URL = os.environ['LOGIN_OIDC_URL']
+LOGIN_OIDC_ISSUER = os.environ['LOGIN_OIDC_ISSUER']
 sub_hash_salt = os.environ['HASH_SALT']
 
 signing_key = RSAKey(key=rsa_load('/src/login/web/keys/server.key'), use='sig', alg='RS256')
 configuration_information = {
-    'issuer': 'https://localhost',
-    'authorization_endpoint': LOGIN_URL + '/authorization',
-    'token_endpoint': LOGIN_URL + '/token',
-    'userinfo_endpoint': LOGIN_URL + '/userinfo',
-    'registration_endpoint': LOGIN_URL + '/registration',
+    'issuer': LOGIN_OIDC_ISSUER,
+    'authorization_endpoint': LOGIN_OIDC_URL + '/authorization',
+    'token_endpoint': LOGIN_OIDC_URL + '/token',
+    'userinfo_endpoint': LOGIN_OIDC_URL + '/userinfo',
+    'registration_endpoint': LOGIN_OIDC_URL + '/registration',
     'response_types_supported': ['code', 'id_token token'],
     'id_token_signing_alg_values_supported': [signing_key.alg],
     'response_modes_supported': ['fragment', 'query'],
