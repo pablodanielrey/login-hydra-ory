@@ -27,10 +27,10 @@ configuration_information = {
     'grant_types_supported': ['authorization_code', 'implicit'],
     'claim_types_supported': ['normal'],
     'claims_parameter_supported': True,
-    'claims_supported': ['sub', 'name', 'given_name', 'family_name'],
+    'claims_supported': ['sub', 'name', 'given_name', 'family_name', 'phone', 'address', 'email'],
     'request_parameter_supported': False,
     'request_uri_parameter_supported': False,
-    'scopes_supported': ['openid', 'profile']
+    'scopes_supported': ['openid','email','phone','profile','address']
 }
 
 
