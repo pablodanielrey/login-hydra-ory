@@ -1,8 +1,8 @@
 
-app.controller("LoginCtrl", ["$scope", "$location", "$routeParams", "$resource", "$timeout","$http", function ($scope, $location, $routeParams, $resource, $timeout, $http) {
+app.controller("LoginCtrl", ["$scope", "$location", "$routeParams", "$resource", "$timeout","$http", "$window", function ($scope, $location, $routeParams, $resource, $timeout, $http, $window) {
 
   // -------------- manejo de pantallas y errores ------------------------------------------------------ //
-  $scope.$parent.errores_posibles = ['UsuarioBloqueadoError','UsuarioInexistenteError','SeguridadError'];
+  $scope.$parent.errores_posibles = ['UsuarioBloqueadoError','UsuarioInexistenteError','SeguridadError', 'SistemaError'];
   $scope.$parent.mensajes = [];
 
   $scope.$parent.estados = ['Estado_Login','Estado_Redireccionando'];
@@ -28,47 +28,30 @@ app.controller("LoginCtrl", ["$scope", "$location", "$routeParams", "$resource",
                 str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
                 return str.join("&");
             },
-            data: data
+            data: data,
+            withCredentials: true
         });
     };
-
-  $scope.enviarDni = function() {
-    $scope._postData('/verificar', {'u':$scope.usuario})
-            .then(function(data, status, headers, config) {
-                $scope.$parent.pasoSiguiente();
-             }).catch(function(data, status, headers, config) {
-               console.log(data);
-               $scope.$parent.setearError(data.data);
-             });
-  };
 
 
   $scope.login = function() {
     $scope._postData('/login', {'u':$scope.usuario, 'p':$scope.clave})
-            .then(function(data, status, headers, config) {
+            .then(function(data) {
                 console.log(data);
-                console.log(status);
-                console.log(headers);
-                console.log(config);
-                $scope.$parent.pasoSiguiente();
+                $scope.$parent.estadoSiguiente();
                 $timeout(function() {
-                  $scope.redirigir();
-                },5);
-             }).catch(function(data, status, headers, config) {
+                  $window.location.href = data.data.url;
+                },0);
+             }).catch(function(data) {
                console.log(data);
-               $scope.$parent.setearError(data.data);
+               if (data.data == null) {
+                 $scope.$parent.setearError({error:'SistemaError'});
+               } else {
+                 $scope.$parent.setearError(data.data);
+               }
              });
   }
 
-  $scope.redirigir = function() {
-    $http({url: '/consent', method: "GET", params: {challenge: $scope.challenge}})
-         .then(function(data, status, headers, config) {
-           console.log(data);
-         })
-         .catch(function(data, status, headers, config) {
-           console.log(data);
-         });
-  }
 
 
 }]);

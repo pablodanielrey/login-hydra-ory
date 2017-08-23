@@ -60,17 +60,19 @@ def authorization_endpoints():
         if error_url:
             return make_response(error_url, 303)
         else:
-            return make_response("Something went wrong: {}".format(str(e)), 400)
+            return make_response("error: {}".format(str(e)), 400)
 
     flask.session['authn_req'] = authn_req.to_dict()
     return redirect(url_for('send'), 303)
 
 
 @app.route('/login', methods=['POST'])
+@jsonapi
 def login():
 
     authn_req = flask.session.get('authn_req', None)
     if not authn_req:
+        ''' aca debería redireccionar al sitio por defecto, pero por ahora tiro un error de seguridad '''
         raise SeguridadError()
 
     usuario = request.form.get('u', None)
@@ -84,7 +86,8 @@ def login():
         rusuario = LoginModel.login(session=s, usuario=usuario, clave=password)
         if rusuario:
             flask.session['usuario_id'] = rusuario.usuario_id
-            return redirect(url_for('redirection_auth_endpoint'))
+            #return redirect(url_for('redirection_auth_endpoint'))
+            return {'url': url_for('redirection_auth_endpoint')}, 200
         else:
             raise ClaveError()
     finally:
@@ -179,6 +182,27 @@ def send(path):
 
 
 ''' ------------------------------------------------------------------ '''
+
+@app.route('/authorization', methods=['OPTIONS'])
+@app.route('/login', methods=['OPTIONS'])
+@app.route('/finalize_auth', methods=['OPTIONS'])
+@app.route('/token', methods=['OPTIONS'])
+@app.route('/userinfo', methods=['OPTIONS'])
+def options(*args, **kargs):
+    '''
+        para autorizar el CORS
+        https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
+    '''
+    o = request.headers.get('Origin')
+    rm = request.headers.get('Access-Control-Request-Method')
+    rh = request.headers.get('Access-Control-Request-Headers')
+
+    r = make_response()
+    r.headers['Access-Control-Allow-Methods'] = 'PUT,POST,GET,HEAD,DELETE'
+    r.headers['Access-Control-Allow-Origin'] = '*'
+    r.headers['Access-Control-Allow-Headers'] = rh
+    r.headers['Access-Control-Max-Age'] = 1
+    return r
 
 
 @app.after_request

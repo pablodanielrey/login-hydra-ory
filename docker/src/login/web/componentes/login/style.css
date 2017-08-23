@@ -24,6 +24,10 @@
 }
 
 
+.login.error.SistemaError .error_sistema {
+  display: flex;
+}
+
 .login.error.SeguridadError .seguridad_error {
   display: flex;
 }
