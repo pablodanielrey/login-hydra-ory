@@ -90,59 +90,9 @@ client_db = DictWrapper('client_db',
                 }
             })
 
-#https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
-user_db_aux = dict()
-user_db_aux['89d88b81-fbc0-48fa-badb-d32854d3d93a'] = {
-        'sub':'89d88b81-fbc0-48fa-badb-d32854d3d93a',
-        'email': 'pablo.rey@econo.unlp.edu.ar',
-        'email_verified': True,
-        'phone_number': '4237467',
-        'phone_number_verified': False,
-        'name':'Pablo Daniel',
-        'given_name': 'Pablo Daniel Rey',
-        'family_name':'Rey',
-        'picture': 'http://192.168.0.3:9000/files/api/v1.0/archivo/6456hgv75756hg7667',
-        'gender': 'Masculino',
-        'birdthdate': datetime.datetime.now().date(),
-        'address': {
-            "street_address": "1234 Hollywood Blvd.",
-            "locality": "Los Angeles",
-            "region": "CA",
-            "postal_code": "90210",
-            "country": "US"
-        },
-        'dni':'27294557',
 
-        'legajo':None
-    }
-
-user_db_aux['205de802-2a15-4652-8fde-f23c674a1246'] = {
-        'sub':'205de802-2a15-4652-8fde-f23c674a1246',
-        'email': 'walter.blanco@econo.unlp.edu.ar',
-        'email_verified': True,
-        'phone_number': '4237467',
-        'phone_number_verified': False,
-        'name':'Walter Roberto',
-        'given_name': 'Walter Roberto Blanco',
-        'family_name':'Blanco',
-        'picture': 'http://192.168.0.3:9000/files/api/v1.0/archivo/6456hgv75756hg7667',
-        'gender': 'Masculino',
-        'birdthdate': datetime.datetime.now().date(),
-        'address': {
-            "street_address": "1234 Hollywood Blvd.",
-            "locality": "Los Angeles",
-            "region": "CA",
-            "postal_code": "90210",
-            "country": "US"
-        },
-        'dni':'27294557',
-
-        'legajo':None
-    }
-
-user_db = DictWrapper('user_db',user_db_aux)
-provider = Provider(signing_key, configuration_information,
-                    authz_state, client_db, Userinfo(user_db))
+def obtener_provider(users_db):
+    return Provider(signing_key, configuration_information, authz_state, client_db, Userinfo(users_db))
 
 
 def should_fragment_encode(authn_req):

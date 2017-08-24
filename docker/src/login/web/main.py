@@ -28,9 +28,53 @@ from oic.oic.message import UserInfoErrorResponse
 # uso should_fragment_encode pero parcheada de mi codigo
 #from pyop.util import should_fragment_encode
 #
-from .OIDC import should_fragment_encode
-from .OIDC import provider
-from .OIDC import user_db
+from .OIDC import should_fragment_encode, obtener_provider
+
+
+
+class UsersWrapper(object):
+    '''
+        conecta el OIDC con el LoginModel para obtener los usuarios
+    '''
+
+    def __init__(self):
+        self.name = 'usuarios'
+
+    def __setitem__(self, key, value):
+        logging.debug('{} --- setitem {} --> {}'.format(self.name, key, value))
+        raise UsuariosError()
+
+    def __getitem__(self, key):
+        s = Session()
+        try:
+            v = LoginModel.obtener_usuario(s, uid=key)
+            logging.debug('{} --- getitem {} --> {}'.format(self.name, key, v))
+            return v
+        finally:
+            s.close()
+
+    def __delitem__(self, key):
+        logging.debug('{} --- delitem {}'.format(self.name, key))
+        raise UsuariosError()
+
+    def __contains__(self, key):
+        s = Session()
+        try:
+            v = LoginModel.existe(s, uid=key)
+            logging.debug('{} --- contains {}'.format(self.name, key))
+            return v
+        finally:
+            s.close()
+
+    def items(self):
+        logging.debug('{} ---  items --'.format(self.name))
+        raise UsersError()
+
+    def pop(self, key, default=None):
+        logging.debug('{} --- pop {}'.format(self.name, key))
+        raise UsersError()
+
+
 
 
 # set the project root directory as the static folder, you can set others.
@@ -41,6 +85,8 @@ app.debug = True
 app.config['SECRET_KEY'] = 'algo-secreto2'
 app.config['SESSION_COOKIE_NAME'] = 'oidc_session'
 #flask_session.Session(app)
+
+provider = obtener_provider(UsersWrapper())
 
 
 ''' para OIDC OP -------------------- '''
@@ -88,7 +134,7 @@ def login():
         if rusuario:
             flask.session['usuario_id'] = rusuario.usuario_id
             #return redirect(url_for('redirection_auth_endpoint'))
-            usuario = user_db[rusuario.usuario_id]
+            usuario = LoginModel.obtener_usuario(session=s, uid=rusuario.usuario_id)
             return {'url': url_for('redirection_auth_endpoint'), 'usuario':usuario}, 200
         else:
             raise ClaveError()
@@ -134,12 +180,11 @@ def token_endpoint():
         return error_resp.to_json(), 400
 
 
-@app.route('/userinfo', methods=['POST'])
-def userinfo_endpoint():
+def _userinfo_endpoint(data, headers):
     try:
         logging.debug('userinfo')
-        logging.debug(request.get_data())
-        response = provider.handle_userinfo_request(request.get_data().decode('utf-8'), request.headers)
+        logging.debug(data)
+        response = provider.handle_userinfo_request(data, headers)
         logging.debug(response)
         return response.to_json()
     except (BearerTokenError, InvalidAccessToken) as e:
@@ -150,22 +195,18 @@ def userinfo_endpoint():
         logging.info(str(http_response))
         return http_response
 
+
+@app.route('/userinfo', methods=['POST'])
+def userinfo_endpoint():
+    data = request.get_data().decode('utf-8')
+    headers = request.headers
+    return _userinfo_endpoint(data, headers)
+
 @app.route('/userinfo', methods=['GET'])
 def userinfo_endpoint_get():
-    try:
-        logging.debug('userinfo')
-        logging.debug(request.args)
-        args = urllib.parse.urlencode(flask.request.args)
-        response = provider.handle_userinfo_request(args, request.headers)
-        logging.debug(response)
-        return response.to_json()
-    except (BearerTokenError, InvalidAccessToken) as e:
-        error_resp = UserInfoErrorResponse(error='invalid_token', error_description=str(e))
-        http_response = make_response(error_resp.to_json())
-        http_response.status_code = 401
-        http_response.headers['WWW-Authenticate'] = AccessToken.BEARER_TOKEN_TYPE + ' realm=oidc'
-        logging.info(str(http_response))
-        return http_response
+    data = request.args
+    headers = request.headers
+    return _userinfo_endpoint(data, headers)
 
 
 

@@ -15,3 +15,4 @@ class UsuarioClave(Base):
     autogenerada = Column(Boolean, default=False)
 
     usuario_id = Column('user_id', String, ForeignKey('profile.users.id'))
+    usuario = relationship('Usuario', back_populates='claves')
