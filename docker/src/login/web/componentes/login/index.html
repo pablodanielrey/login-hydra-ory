@@ -2,8 +2,7 @@
 
   <!-- EstadoLogin -->
 
-  <div class='pantalla contenedorLogin error_de_acceso'>
-    <!-- VARIABLES: error_de_acceso -->
+  <div class='pantalla contenedorLogin {{error_interno}}'>
       <div class=tamanoLogin>
           <div class="subContenedorLogin">
               <div>
@@ -13,20 +12,19 @@
                       <form ng-submit='login()'>
                         <div class="form-group"><input type='text' name='u' class="form-control" placeholder="Ingrese DNI" ng-model='usuario'></input></div>
                         <div class="form-group"><input type='password' name='p' class="form-control" placeholder="Contraseña" ng-model='clave'></input></div>
-                        <button type='submit' class="btn btn-primary btnAcceder">Acceder</button>
+                        <button type='submit' ng-disabled='error.codigo == "UsuarioBloqueadoError"' class="btn btn-primary btnAcceder">Acceder</button>
                       </form>
               </div>
-              <div class="contededorErrorDeAcceso error_usuario_bloqueado">
-                  <!-- VARIABLES: error_primer_de_acceso , error_reiterado_de_acceso  ,error_usuario_bloqueado -->
+              <div ng-if='error.error != ""' class="contenedorErrorDeAcceso">
                   <i class="flechacontenedor fa fa-caret-up fa-2x" aria-hidden="true"></i>
-                  <div class="erroresDeAcceso errorPrimerAcceso">
-                    Nombre de usuario y/o contraseña incorrectos. inténtalo de nuevo.
+                  <div class="erroresDeAcceso errorUsuarioInexistente">
+                    Nombre de usuario y/o contraseña incorrectos.
                   </div>
                   <div class="erroresDeAcceso errorIntentosFallidos">
-                    Nombre de usuario y/o contraseña incorrectos. Te quedan <b>3</b> intentos.
+                    Nombre de usuario y/o contraseña incorrectos. Te quedan <b>{{model.intentos_restantes}}</b> intentos.
                   </div>
                   <div class="erroresDeAcceso errorUsuarioBloquedado">
-                    <b>Usuario bloqueado</b> por reiterados intentos de acceso fallidos.
+                    <b>Usuario bloqueado</b> por <b>{{model.tiempo_de_bloqueo}} minutos</b> debido a reiterados intentos de acceso fallidos.
                   </div>
               </div>
               <hr>
@@ -42,22 +40,7 @@
   </div>
 
 
-
-  <div class='pantalla_error contenedorErrores'>
-
-    <!-- <div class='pantalla_error usuario_bloqueado'>
-      Su usuario ha sido bloqueado.
-      Por favor contacte con DeTiSE haciendo click <a href='#'>aqui</a>
-    </div> -->
-
-    <!-- <div class='pantalla_error usuario_inexistente'>
-      No tenemos registrado a ninguna persona con ese dni.
-      Si es alumno debe seguir los pasos .....
-      Si es docente debe acercarse a personal para que verifiquen el estado de sus designaciones
-      Si es no-docente debe acercarse a personal para que ...
-    </div> -->
-
-    <div class='pantalla_error error_sistema'>
+    <div class='pantalla_error errorSistema'>
       <div class="estiloError">
         <div>
           <i class="iconosErrores fa fa-server" aria-hidden="true"></i>
@@ -70,7 +53,7 @@
       </div>
     </div>
 
-    <div class='pantalla_error seguridad_error'>
+    <div class='pantalla_error seguridadError'>
       <div class="estiloError">
         <div>
           <i class="iconosErrores fa fa-meh-o" aria-hidden="true"></i>
@@ -81,33 +64,5 @@
         </div>
       </div>
     </div>
-
-  </div>
-
-  <!-- EstadoRedireccionando -->
-
-  <div class='pantalla contenedorRedireccionando'>
-    <div class=tamanoLogin>
-        <div class="subContenedorLoginRedireccionando">
-            <div>
-              <img class="imgAvatar" src="./img/avatar.png"></img>
-              <img class="imgAvatar" src="{{usuario.picture}}"></img>
-
-            </div><br>
-            <div>Bienvenido</div>
-            <div class="nombreUsuario">Walter{{usuario.name}}</div>
-            <div>
-              <img class="imgCargando" src="img/preloader.gif"></img>
-            </div>
-        </div>
-    </div>
-    <div>
-    </div>
-  </div>
-
-  <div class='pantalla_error error_redireccionando'>
-    error redireccionando
-    Por favor contacte con DeTiSE haciendo click <a href='#'>aqui</a>
-  </div>
 
 </div>

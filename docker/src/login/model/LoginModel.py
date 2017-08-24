@@ -43,7 +43,12 @@ class LoginModel:
             ''' se deben cheqeuar intentos de login, y disparar : SeguridadError en el caso de que se haya alcanzado el máximo de intentos '''
             return session.query(UsuarioClave).filter(UsuarioClave.nombre_de_usuario == usuario, UsuarioClave.clave == clave).one()
         except Exception:
-            raise ClaveError()
+            raise UsuarioNoEncontradoError()
+            ''' chequear si hay que bloquear al usuario '''
+            #raise UsuarioBloqueadoError(data={'tiempo_de_bloqueo':59})
+            '''
+            raise ClaveError(data={'intentos_restantes':0})
+            '''
 
     @classmethod
     def obtener_usuario(cls, session, uid):

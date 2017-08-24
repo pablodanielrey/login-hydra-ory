@@ -2,7 +2,7 @@
 app.controller("LoginCtrl", ["$scope", "$location", "$routeParams", "$resource", "$timeout","$http", "$window", function ($scope, $location, $routeParams, $resource, $timeout, $http, $window) {
 
   // -------------- manejo de pantallas y errores ------------------------------------------------------ //
-  $scope.$parent.errores_posibles = ['UsuarioBloqueadoError','UsuarioInexistenteError','SeguridadError', 'SistemaError'];
+  $scope.$parent.errores_posibles = ['UsuarioBloqueadoError','UsuarioNoEncontradoError', 'ClaveError', 'SeguridadError', 'SistemaError'];
   $scope.$parent.mensajes = [];
 
   $scope.$parent.estados = ['Estado_Login','Estado_Redireccionando'];
@@ -11,7 +11,25 @@ app.controller("LoginCtrl", ["$scope", "$location", "$routeParams", "$resource",
     $scope.$parent.mensaje = {mensaje:'', codigo:''};
   });
   //////////////////
+  //
+  // $scope.errores_internos = ['', 'error_de_primer_acceso' , 'error_reiterado_de_acceso', 'error_usuario_bloqueado'];
+  // $scope.error_interno = 'error_usuario_bloqueado';
 
+  $scope.model = {
+    intentos_restantes: 5
+  }
+
+  /*
+  $scope.restar_intentos = function() {
+    $scope.model.intentos_restantes = $scope.model.intentos_restantes - 1;
+    if ($scope.model.intentos_restantes > 0) {
+      $timeout($scope.restar_intentos, 1000);
+    } else {
+      $scope.$parent.setearError({error:'UsuarioBloqueadoError'});
+    }
+  }
+  $timeout($scope.restar_intentos,1000);
+*/
 
   /*
     hace post de los datos en urlencoded formato. a la url especificada
@@ -49,11 +67,23 @@ app.controller("LoginCtrl", ["$scope", "$location", "$routeParams", "$resource",
 
              }).catch(function(data) {
                console.log(data);
+
+
                if (data.data == null) {
                  $scope.$parent.setearError({error:'SistemaError'});
-               } else {
-                 $scope.$parent.setearError(data.data);
+                 return;
                }
+
+               if (data.data.error == 'UsuarioBloqueadoError') {
+                 $scope.model.tiempo_de_bloqueo = data.data.data.tiempo_de_bloqueo;
+               }
+
+               if (data.data.error == 'ClaveError') {
+                 $scope.model.intentos_restantes = data.data.data.intentos_restantes;
+               }
+
+               $scope.$parent.setearError(data.data);
+
              });
   }
 

@@ -5,5 +5,6 @@ __all__ = [
     'LoginError',
     'UsuarioNoEncontradoError',
     'ClaveError',
-    'SeguridadError'
+    'SeguridadError',
+    'UsuarioBloqueadoError'
 ]

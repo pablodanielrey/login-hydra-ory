@@ -7,9 +7,7 @@
   display: none;
 }
 
-.login.error .contenedorErrores {
-  display: flex;
-}
+
 
 .login.Estado_Login .contenedorLogin {
   display: flex;
@@ -23,48 +21,65 @@
   display: -moz-flex;
 }
 
-.login.error .pantalla {
+/*.login.error .pantalla {
+  display: none;
+}*/
+
+
+.login.error.SistemaError .pantalla {
   display: none;
 }
 
-
-.login.error.SistemaError .error_sistema {
+.login.error.SistemaError .errorSistema {
   display: flex;
 }
 
-.login.error.SeguridadError .seguridad_error {
+.login.error.SeguridadError .pantalla {
+  display: none;
+}
+.login.error.SeguridadError .seguridadError {
   display: flex;
 }
 
-.login.error.UsuarioBloqueadoError .usuario_bloqueado {
-  display: flex;
+.login.error.ClaveError .errorIntentosFallidos {
+  display: block;
 }
 
-.login.error.UsuarioInexistenteError .usuario_inexistente {
-  display: flex;
+.login.error.UsuarioNoEncontradoError .errorUsuarioInexistente {
+  display: block;
 }
 
-.login .contededorErrorDeAcceso {
+.login.error.UsuarioBloqueadoError .errorUsuarioBloquedado {
+  display: block;
+}
+
+
+
+/*.login .contededorErrorDeAcceso {
+  display: none;
+}*/
+
+/*.login .contenedorLogin.error_de_acceso .contededorErrorDeAcceso {
+  display: block;
+}*/
+
+.login .contenedorErrorDeAcceso > div {
   display: none;
 }
 
-.login .contenedorLogin.error_de_acceso .contededorErrorDeAcceso {
-  display: block;
-}
-
-.login .erroresDeAcceso, .errorIntentosFallidos .errorUsuarioBloquedado {
+/*.login .erroresDeAcceso, .errorIntentosFallidos .errorUsuarioBloquedado {
   display: none;
-}
+}*/
 
-.login .contededorErrorDeAcceso.error_primer_de_acceso .errorPrimerAcceso {
+/*.login .contenedorErrorDeAcceso.error_de_primer_acceso .errorPrimerAcceso {
   display: block;
 }
-.login .contededorErrorDeAcceso.error_reiterado_de_acceso .errorIntentosFallidos {
+.login .contenedorErrorDeAcceso.error_reiterado_de_acceso .errorIntentosFallidos {
   display: block;
-}
-.login .contededorErrorDeAcceso.error_usuario_bloqueado .errorUsuarioBloquedado {
+}*/
+/*.login .contenedorErrorDeAcceso.error_usuario_bloqueado .error_usuario_bloqueado {
   display: block;
-}
+}*/
 
 /*----- estilos de la pantalla --*/
 
