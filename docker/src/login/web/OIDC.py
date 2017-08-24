@@ -31,7 +31,7 @@ configuration_information = {
     'claims_supported': ['sub', 'name', 'given_name', 'family_name', 'phone', 'address', 'email'],
     'request_parameter_supported': False,
     'request_uri_parameter_supported': False,
-    'scopes_supported': ['openid','email','phone','profile','address']
+    'scopes_supported': ['openid','email','phone','profile','address','picture']
 }
 
 

@@ -85,7 +85,10 @@ class LoginModel:
             ''' hay que ver el tema del picture ahora lo hago con gravatar '''
             if 'email' in r:
                 h = hashlib.md5(r['email'].strip().lower().encode('utf-8')).hexdigest()
+                '''
                 r['picture'] = 'https://www.gravatar.com/avatar/' + h + '?s=100&d=mm'
+                '''
+                r['pircture'] = os.environ['USERS_API_URL'] + '/avatar/' + h
             return r
 
         except Exception as e:
