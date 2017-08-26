@@ -63,14 +63,19 @@ class LoginModel:
 
             r = {
                 'sub': u.id,
-                'id': u.id,
-                'dni': u.dni,
                 'name': u.nombre,
                 'given_name': u.nombre + ' ' + u.apellido,
                 'family_name': u.apellido,
                 'gender': u.genero,
                 'birdthdate': u.nacimiento
             }
+
+            r['econo'] = {
+                'id': u.id,
+                'dni': u.dni,
+                'legajo': ''
+            }
+
 
             if u.ciudad or u.direccion or u.pais:
                 r['address'] = {

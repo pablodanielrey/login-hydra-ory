@@ -184,6 +184,7 @@ def _userinfo_endpoint(data, headers):
     try:
         logging.debug('userinfo')
         logging.debug(data)
+        logging.debug(headers)
         response = provider.handle_userinfo_request(data, headers)
         logging.debug(response)
         return response.to_json()

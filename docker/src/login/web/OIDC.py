@@ -28,10 +28,16 @@ configuration_information = {
     'grant_types_supported': ['authorization_code', 'implicit'],
     'claim_types_supported': ['normal'],
     'claims_parameter_supported': True,
-    'claims_supported': ['sub', 'name', 'given_name', 'family_name', 'phone', 'address', 'email'],
+    'claims_supported': [
+                "sub", 'phone', 'address', 'email',
+                "name", "given_name", "family_name", "middle_name",
+                "nickname", "profile", "picture", "website", "gender",
+                "birthdate", "zoneinfo", "locale", "updated_at",
+                "preferred_username"
+            ],
     'request_parameter_supported': False,
     'request_uri_parameter_supported': False,
-    'scopes_supported': ['openid','email','phone','profile','address','picture']
+    'scopes_supported': ['openid','email','phone','profile','address','econo']
 }
 
 
@@ -90,6 +96,76 @@ client_db = DictWrapper('client_db',
                 }
             })
 
+
+"""
+from pyop.access_token import extract_bearer_token_from_http_request
+from urllib.parse import parse_qsl
+from pyop.exceptions import AuthorizationError
+from pyop.exceptions import InvalidAccessToken
+from pyop.exceptions import InvalidTokenRequest
+from pyop.exceptions import InvalidAuthorizationCode
+from oic.oic import scope2claims
+from oic import rndstr
+from oic.exception import MessageException
+from oic.oic import PREFERENCE2PROVIDER
+from oic.oic import scope2claims
+from oic.oic.message import AccessTokenRequest
+from oic.oic.message import AccessTokenResponse
+from oic.oic.message import AuthorizationRequest
+from oic.oic.message import AuthorizationResponse
+from oic.oic.message import EndSessionRequest
+from oic.oic.message import EndSessionResponse
+from oic.oic.message import IdToken
+from oic.oic.message import OpenIDSchema
+from oic.oic.message import ProviderConfigurationResponse
+from oic.oic.message import RefreshAccessTokenRequest
+from oic.oic.message import RegistrationRequest
+from oic.oic.message import RegistrationResponse
+
+class MyProvider(Provider):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def handle_userinfo_request(self, request=None, http_headers=None):
+        # type: (Optional[str], Optional[Mapping[str, str]]) -> oic.oic.message.OpenIDSchema
+        '''
+        Handles a userinfo request.
+        :param request: urlencoded request (either query string or POST body)
+        :param http_headers: http headers
+        '''
+        if http_headers is None:
+            http_headers = {}
+        userinfo_request = dict(parse_qsl(request))
+        bearer_token = extract_bearer_token_from_http_request(userinfo_request, http_headers.get('Authorization'))
+
+        introspection = self.authz_state.introspect_access_token(bearer_token)
+        if not introspection['active']:
+            raise InvalidAccessToken('The access token has expired')
+        scope = introspection['scope']
+        user_id = self.authz_state.get_user_id_for_subject_identifier(introspection['sub'])
+
+
+        requested_claims = scope2claims(scope.split())
+        authentication_request = self.authz_state.get_authorization_request_for_access_token(bearer_token)
+        requested_claims.update(self._get_requested_claims_in(authentication_request, 'userinfo'))
+        user_claims = self.userinfo.get_claims_for(user_id, requested_claims)
+
+
+        logging.debug('----------------------------------------------------------')
+        logging.debug(scope)
+        logging.debug(requested_claims)
+
+
+
+        user_claims.setdefault('sub', introspection['sub'])
+        response = OpenIDSchema(**user_claims)
+        #logger.debug('userinfo=%s from requested_claims=%s userinfo=%s', response, requested_claims, user_claims)
+        return response
+
+def obtener_provider(users_db):
+    return MyProvider(signing_key, configuration_information, authz_state, client_db, Userinfo(users_db))
+"""
 
 def obtener_provider(users_db):
     return Provider(signing_key, configuration_information, authz_state, client_db, Userinfo(users_db))
