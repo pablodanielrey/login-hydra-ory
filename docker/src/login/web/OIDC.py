@@ -88,11 +88,18 @@ authz_state = AuthorizationState(subject_id_factory,
                                  refresh_tokens,
                                  subject_identifiers)
 client_db = DictWrapper('client_db',
-            {'some-consumer':{
-                'client_secret': 'consumer-secret',
-                'redirect_uris':['http://usuarios.econo.unlp.edu.ar:5005/oidc_callback'],
-                'response_types': ['code', 'id_token token'],
-                'token_endpoint_auth_method':'client_secret_post'
+            {
+                'users':{
+                    'client_secret': 'consumer-secret',
+                    'redirect_uris':['http://usuarios.econo.unlp.edu.ar:5005/oidc_callback'],
+                    'response_types': ['code', 'id_token token'],
+                    'token_endpoint_auth_method':'client_secret_post'
+                },
+                'sileg': {
+                    'client_secret': 'consumer-secret',
+                    'redirect_uris':['http://gelis.econo.unlp.edu.ar:5020/oidc_callback'],
+                    'response_types': ['code', 'id_token token'],
+                    'token_endpoint_auth_method':'client_secret_post'
                 }
             })
 
