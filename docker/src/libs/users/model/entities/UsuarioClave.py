@@ -12,7 +12,7 @@ class UsuarioClave(Base):
     clave = Column('password', String)
     expiracion = Column(DateTime)
     eliminada = Column(DateTime)
-    autogenerada = Column(Boolean, default=False)
+    debe_cambiarla = Column(Boolean, default=False)
 
     usuario_id = Column('user_id', String, ForeignKey('profile.users.id'))
     usuario = relationship('Usuario', back_populates='claves')

@@ -1,3 +1,4 @@
+import os
 import uuid
 import datetime
 import base64
@@ -13,11 +14,39 @@ from .entities import *
 
 class UsersModel:
 
+    FILES_API_URL = os.environ['FILES_API_URL']
+
     @staticmethod
     def _aplicar_filtros_comunes(q, offset, limit):
         q = q.offset(offset) if offset else q
         q = q.limit(limit) if limit else q
         return q
+
+
+    @classmethod
+    def obtener_avatar(cls, hash):
+        url = cls.FILES_API_URL + '/archivo/' + hash + '/contenido'
+        resp = requests.get(url)
+        if resp.status_code != 200:
+            ''' pruebo obtener una imagen por defecto '''
+            resp = requests.get('http://icons.iconarchive.com/icons/arrioch/whack/128/Whack-Google-Earth-icon.png')
+            if resp.status_code != 200:
+                raise UsersError()
+
+        avatar = {
+            'name': 'default',
+            'data': base64.b64encode(resp.content).decode('utf-8'),
+            'content-type': resp.headers['Content-Type']
+        }
+        return avatar
+
+    @classmethod
+    def actualizar_avatar(cls, hash, contenido):
+        url = cls.FILES_API_URL + '/archivo/' + hash + '.json'
+        resp = requests.post(url=url, json={'id':hash, 'data':contenido})
+        if resp.status_code != 200:
+            raise UsersError()
+
 
     @classmethod
     def claves(cls, session, uid=None, cid=None, limit=None, offset=None):
@@ -59,9 +88,21 @@ class UsersModel:
 
     @classmethod
     def actualizar_usuario(cls, session, uid, datos):
+        import re
+        g = re.match('((\w)*\s*)*', datos['nombre'])
+        if not g:
+            raise FormatoIncorrecto()
+        nombre = g.group()
+
+        g2 = re.match('((\w)*\s*)*', datos['apellido'])
+        if not g:
+            raise FormatoIncorrecto()
+        apellido = g2.group()
+
         usuario = session.query(Usuario).filter(Usuario.id == uid).one()
-        if 'nombre' in datos: usuario.nombre = datos['nombre']
-        if 'apellido' in datos: usuario.apellido = datos['apellido']
+        usuario.nombre = nombre
+        usuario.apellido = apellido
+
 
     @classmethod
     def usuarios(cls, session, usuario=None, dni=None, retornarClave=False, fecha_actualizado=None, offset=None, limit=None, fecha=None):
@@ -92,6 +133,7 @@ class UsersModel:
     @classmethod
     def agregar_correo(cls, session, uid, datos):
         assert 'email' in datos
+        assert len(datos['email'].strip()) > 0
         if (session.query(Mail).filter(Mail.usuario_id == uid, Mail.email == datos['email'], Mail.eliminado == None).count() >= 1):
             ''' ya existe, no lo agrego pero no tiro error '''
             return

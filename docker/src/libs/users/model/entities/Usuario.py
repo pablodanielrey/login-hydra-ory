@@ -19,6 +19,7 @@ class Usuario(Base):
     direccion = Column('address', String)
     tipo = Column('type', String)
     google = Column('google', Boolean)
+    avatar = Column(String)
 
     mails = relationship('Mail', back_populates='usuario')
     telefonos = relationship('Telefono', back_populates='usuario')

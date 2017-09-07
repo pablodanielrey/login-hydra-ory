@@ -45,3 +45,7 @@ class LimiteDeVerificacionError(ResetClaveError):
 class ClaveError(ResetClaveError):
     def __init__(self):
         super().__init__(status_code=500)
+
+class CorreoBloqueadoError(ResetClaveError):
+    def __init__(self):
+        super().__init__(status_code=500)
