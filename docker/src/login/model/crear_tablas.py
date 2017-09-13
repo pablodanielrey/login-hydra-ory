@@ -1,4 +1,11 @@
 
 if __name__ == '__main__':
-    from login.model import crear_tablas
-    crear_tablas()
+
+    from sqlalchemy.schema import CreateSchema
+    from model_utils import Base
+
+    from login.model.engine import engine
+    from login.model.entities import *
+
+    #engine.execute(CreateSchema('login'))
+    LoginLog.table.create(engine)
