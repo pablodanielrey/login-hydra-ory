@@ -8,4 +8,4 @@ if __name__ == '__main__':
     from login.model.entities import *
 
     #engine.execute(CreateSchema('login'))
-    LoginLog.table.create(engine)
+    Base.metadata.create_all(engine)

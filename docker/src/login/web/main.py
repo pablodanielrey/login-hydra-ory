@@ -8,7 +8,8 @@ from flask import Flask, request, send_from_directory, jsonify, redirect, sessio
 from flask_jsontools import jsonapi
 import flask_session
 
-from login.model import Session, LoginModel
+from login.model import LoginModel
+from login.model.engine import Session, UsersSession
 from login.model.exceptions import *
 
 from rest_utils import register_encoder
@@ -32,50 +33,6 @@ from .OIDC import should_fragment_encode, obtener_provider
 
 
 
-class UsersWrapper(object):
-    '''
-        conecta el OIDC con el LoginModel para obtener los usuarios
-    '''
-
-    def __init__(self):
-        self.name = 'usuarios'
-
-    def __setitem__(self, key, value):
-        logging.debug('{} --- setitem {} --> {}'.format(self.name, key, value))
-        raise UsuariosError()
-
-    def __getitem__(self, key):
-        s = Session()
-        try:
-            v = LoginModel.obtener_usuario(s, uid=key)
-            logging.debug('{} --- getitem {} --> {}'.format(self.name, key, v))
-            return v
-        finally:
-            s.close()
-
-    def __delitem__(self, key):
-        logging.debug('{} --- delitem {}'.format(self.name, key))
-        raise UsuariosError()
-
-    def __contains__(self, key):
-        s = Session()
-        try:
-            v = LoginModel.existe(s, uid=key)
-            logging.debug('{} --- contains {}'.format(self.name, key))
-            return v
-        finally:
-            s.close()
-
-    def items(self):
-        logging.debug('{} ---  items --'.format(self.name))
-        raise UsersError()
-
-    def pop(self, key, default=None):
-        logging.debug('{} --- pop {}'.format(self.name, key))
-        raise UsersError()
-
-
-
 
 # set the project root directory as the static folder, you can set others.
 app = Flask(__name__, static_url_path='/src/login/web')
@@ -86,7 +43,7 @@ app.config['SECRET_KEY'] = 'algo-secreto2'
 app.config['SESSION_COOKIE_NAME'] = 'oidc_session'
 #flask_session.Session(app)
 
-provider = obtener_provider(UsersWrapper())
+provider = obtener_provider()
 
 
 ''' para OIDC OP -------------------- '''
@@ -128,7 +85,7 @@ def login():
     if not usuario or not password:
         raise ClaveError()
 
-    s = Session()
+    s = UsersSession()
     try:
         rusuario = LoginModel.login(session=s, usuario=usuario, clave=password)
         if rusuario:

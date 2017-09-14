@@ -9,6 +9,10 @@ from pyop.storage import MongoWrapper
 from pyop.subject_identifier import HashBasedSubjectIdentifierFactory
 from pyop.userinfo import Userinfo
 
+from login.model import LoginModel
+from login.model.entities import AuthzCode, AccessToken, RefreshToken, SubjectIdentifier
+from login.model.engine import Session, UsersSession
+
 
 LOGIN_OIDC_URL = os.environ['LOGIN_OIDC_URL']
 LOGIN_OIDC_ISSUER = os.environ['LOGIN_OIDC_ISSUER']
@@ -39,6 +43,115 @@ configuration_information = {
     'request_uri_parameter_supported': False,
     'scopes_supported': ['openid','email','phone','profile','address','econo']
 }
+
+
+# ------------------ usuarios -------------------
+
+class UsersWrapper(object):
+    '''
+        conecta el OIDC con el LoginModel para obtener los usuarios
+    '''
+
+    def __init__(self):
+        self.name = 'usuarios'
+
+    def __setitem__(self, key, value):
+        logging.debug('{} --- setitem {} --> {}'.format(self.name, key, value))
+        raise UsuariosError()
+
+    def __getitem__(self, key):
+        s = UsersSession()
+        try:
+            v = LoginModel.obtener_usuario(s, uid=key)
+            logging.debug('{} --- getitem {} --> {}'.format(self.name, key, v))
+            return v
+        finally:
+            s.close()
+
+    def __delitem__(self, key):
+        logging.debug('{} --- delitem {}'.format(self.name, key))
+        raise UsuariosError()
+
+    def __contains__(self, key):
+        s = UsersSession()
+        try:
+            v = LoginModel.existe(s, uid=key)
+            logging.debug('{} --- contains {}'.format(self.name, key))
+            return v
+        finally:
+            s.close()
+
+    def items(self):
+        logging.debug('{} ---  items --'.format(self.name))
+        raise UsersError()
+
+    def pop(self, key, default=None):
+        logging.debug('{} --- pop {}'.format(self.name, key))
+        raise UsersError()
+
+
+#-------------- login --------------------------------
+
+import json
+
+class SqlAlchemyWrapper(object):
+
+    def __init__(self, clase):
+        self.clase = clase
+
+    def __setitem__(self, key, value):
+        vvalue = json.dumps(value)
+        s = Session()
+        try:
+            c = self.clase()
+            c.code = key
+            c.valor = vvalue
+            s.add(c)
+            s.commit()
+        finally:
+            s.close()
+
+
+    def __getitem__(self, key):
+        s = Session()
+        try:
+            v = s.query(self.clase).filter_by(code=key).one_or_none()
+            if v:
+                return json.loads(v.valor)
+            return None
+        finally:
+            s.close()
+
+    def __delitem__(self, key):
+        s = Session()
+        try:
+            s.query(self.clase).filter_by(code=key).delete()
+            s.commit()
+        finally:
+            s.close()
+
+    def __contains__(self, key):
+        s = Session()
+        try:
+            return s.query(self.clase).filter_by(code=key).count() > 0
+        finally:
+            s.close()
+
+    def items(self):
+        s = Session()
+        try:
+            items = []
+            for i in s.query(self.clase).all():
+                items.append((i.code, json.loads(i.valor)))
+            return items
+        finally:
+            s.close()
+
+    def pop(self, key, default=None):
+        raise Exception()
+
+
+
 
 
 class DictWrapper(object):
@@ -76,10 +189,10 @@ class DictWrapper(object):
         return v
 
 
-authz_codes = DictWrapper('authz_codes')
-access_tokens = DictWrapper('access_tokens')
-refresh_tokens = DictWrapper('refresh_tokens')
-subject_identifiers = DictWrapper('subject_identifiers')
+authz_codes = SqlAlchemyWrapper(AuthzCode)
+access_tokens = SqlAlchemyWrapper(AccessToken)
+refresh_tokens = SqlAlchemyWrapper(RefreshToken)
+subject_identifiers = SqlAlchemyWrapper(SubjectIdentifier)
 
 subject_id_factory = HashBasedSubjectIdentifierFactory(sub_hash_salt)
 authz_state = AuthorizationState(subject_id_factory,
@@ -174,8 +287,8 @@ def obtener_provider(users_db):
     return MyProvider(signing_key, configuration_information, authz_state, client_db, Userinfo(users_db))
 """
 
-def obtener_provider(users_db):
-    return Provider(signing_key, configuration_information, authz_state, client_db, Userinfo(users_db))
+def obtener_provider():
+    return Provider(signing_key, configuration_information, authz_state, client_db, Userinfo(UsersWrapper()))
 
 
 def should_fragment_encode(authn_req):
