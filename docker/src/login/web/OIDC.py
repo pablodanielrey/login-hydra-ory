@@ -5,7 +5,6 @@ import datetime
 from jwkest.jwk import rsa_load, RSAKey
 from pyop.authz_state import AuthorizationState
 from pyop.provider import Provider
-from pyop.storage import MongoWrapper
 from pyop.subject_identifier import HashBasedSubjectIdentifierFactory
 from pyop.userinfo import Userinfo
 
@@ -149,8 +148,6 @@ class SqlAlchemyWrapper(object):
 
     def pop(self, key, default=None):
         raise Exception()
-
-
 
 
 
