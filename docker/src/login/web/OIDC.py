@@ -207,7 +207,13 @@ client_db = DictWrapper('client_db',
                 },
                 'sileg': {
                     'client_secret': 'consumer-secret',
-                    'redirect_uris':['http://gelis.econo.unlp.edu.ar:5020/oidc_callback'],
+                    'redirect_uris':['http://sileg.econo.unlp.edu.ar:5020/oidc_callback'],
+                    'response_types': ['code', 'id_token token'],
+                    'token_endpoint_auth_method':'client_secret_post'
+                },
+                'issues': {
+                    'client_secret': 'consumer-secret',
+                    'redirect_uris':['http://issues.econo.unlp.edu.ar:5015/oidc_callback'],
                     'response_types': ['code', 'id_token token'],
                     'token_endpoint_auth_method':'client_secret_post'
                 }
