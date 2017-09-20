@@ -1,15 +1,6 @@
 
-app.controller("LoginCtrl", ["$scope", "$location", "$routeParams", "$resource", "$timeout","$http", "$window", function ($scope, $location, $routeParams, $resource, $timeout, $http, $window) {
+app.controller("LoginCtrl", ["$scope", "$location", "$timeout","$http", "$window", "$state", function ($scope, $location, $timeout, $http, $window, $state) {
 
-  // -------------- manejo de pantallas y errores ------------------------------------------------------ //
-  $scope.$parent.errores_posibles = ['UsuarioBloqueadoError','UsuarioNoEncontradoError', 'ClaveError', 'SeguridadError', 'SistemaError'];
-  $scope.$parent.mensajes = [];
-
-  $scope.$parent.estados = ['Estado_Login','Estado_Redireccionando'];
-  $timeout(function() {
-    $scope.$parent.estado = 'Estado_Login';
-    $scope.$parent.mensaje = {mensaje:'', codigo:''};
-  });
   //////////////////
   //
   // $scope.errores_internos = ['', 'error_de_primer_acceso' , 'error_reiterado_de_acceso', 'error_usuario_bloqueado'];
@@ -67,7 +58,7 @@ app.controller("LoginCtrl", ["$scope", "$location", "$routeParams", "$resource",
 
              }).catch(function(data) {
                console.log(data);
-
+               $scope.setearError(data.data);
 
                if (data.data == null) {
                  $scope.$parent.setearError({error:'SistemaError'});
@@ -88,5 +79,10 @@ app.controller("LoginCtrl", ["$scope", "$location", "$routeParams", "$resource",
   }
 
 
+  $scope.setearError = function(err) {
+    $state.go('login.' + err.error);
+  }
+
+  $state.go('login.login');
 
 }]);

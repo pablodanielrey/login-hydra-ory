@@ -1,14 +1,4 @@
 
-.login > div {
-  display: none;
-}
-
-.login .contenedorErrores > div {
-  display: none;
-}
-
-
-
 .login.Estado_Login .contenedorLogin {
   display: flex;
   display: -webkit-flex;
@@ -26,17 +16,11 @@
 }*/
 
 
-.login.error.SistemaError .pantalla {
-  display: none;
-}
 
 .login.error.SistemaError .errorSistema {
   display: flex;
 }
 
-.login.error.SeguridadError .pantalla {
-  display: none;
-}
 .login.error.SeguridadError .seguridadError {
   display: flex;
 }
@@ -63,9 +47,6 @@
   display: block;
 }*/
 
-.login .contenedorErrorDeAcceso > div {
-  display: none;
-}
 
 /*.login .erroresDeAcceso, .errorIntentosFallidos .errorUsuarioBloquedado {
   display: none;

@@ -5,7 +5,7 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-route.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/1.0.3/angular-ui-router.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-resource.js"></script>
   <!-- Latest compiled and minified CSS -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
@@ -17,22 +17,17 @@
   <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet">
 
 
-  <script src='/module.js'></script>
-  <script src="/index.js"></script>
+  <script src='module.js'></script>
+  <script src="index.js"></script>
   <link rel="stylesheet" type="text/css" href="index.css">
 
-  <script src='/componentes/consola/controller.js'></script>
-  <link rel="stylesheet" type="text/css" href="/componentes/consola/style.css">
-
-  <script src='/componentes/login/controller.js'></script>
-  <link rel="stylesheet" type="text/css" href="/componentes/login/style.css">
-
+  <script src='componentes/login/controller.js'></script>
+  <link rel="stylesheet" type="text/css" href="componentes/login/style.css">
 
 
 </head>
 
 <body class='sistema sistemaLogin' ng-app="MainApp" ng-controller="IndexCtrl">
-  <div ng-view></div>
-  <div ng-include="'componentes/consola/index.html'" ng-controller="ConsolaCtrl"></div>
+  <div ui-view></div>
 </body>
 </html>

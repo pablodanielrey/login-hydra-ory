@@ -1,13 +1,36 @@
-app = angular.module('MainApp', ['ngRoute', 'ngResource'])
+app = angular.module('MainApp', ['ui.router'])
 
-app.config(['$routeProvider', function($routeProvider) {
 
-  $routeProvider
-    .when('/login', {templateUrl: '/componentes/login/index.html', controller:'LoginCtrl'})
-    .otherwise({ redirectTo: '/login' });
+app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
+
+  $urlRouterProvider.otherwise("/login");
+
+  // --- preload ----
+
+  $stateProvider
+  .state('login', {
+    url:'/login',
+    templateUrl: 'componentes/login/index.html',
+    controller:'LoginCtrl'
+  })
+  .state('login.login', {
+    url:'/login_login',
+    templateUrl: 'componentes/login/templates/login.html',
+    controller:'LoginCtrl'
+  })
+  .state('login.SistemaError', {
+    url:'/sistema_error',
+    templateUrl: 'componentes/login/templates/error_sistema.html',
+  })
+  .state('login.SeguridadError', {
+    url:'/seguridad_error',
+    templateUrl: 'componentes/login/templates/error_seguridad.html',
+  })
+
 
 }]);
 
-app.config(['$resourceProvider', function($resourceProvider) {
-  $resourceProvider.defaults.stripTrailingSlashes = false;
-}]);
+
+// app.config(['$resourceProvider', function($resourceProvider) {
+//   $resourceProvider.defaults.stripTrailingSlashes = false;
+// }]);
