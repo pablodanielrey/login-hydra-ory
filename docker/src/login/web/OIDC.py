@@ -199,6 +199,12 @@ authz_state = AuthorizationState(subject_id_factory,
                                  subject_identifiers)
 client_db = DictWrapper('client_db',
             {
+                'ditesi':{
+                    'client_secret': 'consumer-secret',
+                    'redirect_uris':['http://ditesi.econo.unlp.edu.ar:5030/oidc_callback'],
+                    'response_types': ['code', 'id_token token'],
+                    'token_endpoint_auth_method':'client_secret_post'
+                },
                 'users':{
                     'client_secret': 'consumer-secret',
                     'redirect_uris':['http://usuarios.econo.unlp.edu.ar:5005/oidc_callback'],
