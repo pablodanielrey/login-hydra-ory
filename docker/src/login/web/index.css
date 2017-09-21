@@ -7,3 +7,12 @@ html, body {
   font-family: 'Open Sans', sans-serif;
   /*overflow: hidden;*/
 }
+
+
+@media screen and (max-width: 719px) {
+  html, body {
+    background-image: none;
+    background-color: white;
+  }
+
+}
