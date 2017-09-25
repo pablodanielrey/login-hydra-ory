@@ -85,14 +85,20 @@ class LoginModel:
                 }
 
             if u.mails != None and len(u.mails) > 0:
-                r['email'] = u.mails[0].email
-                r['email_verified'] = True if u.mails[0].fecha_confirmado != None else False
+                for ma in u.mails:
+                    if ma.fecha_confirmado:
+                        r['email'] = ma.email
+                        r['email_verified'] = True
+                        break
+                else:
+                    r['email'] = u.mails[0].email
+                    r['email_verified'] = False
 
             if u.telefonos != None and len(u.telefonos) > 0:
                 r['phone_number'] = u.telefonos[0].numero
                 #r['phone_number_verified'] = False
 
-            ''' hay que ver el tema del picture ahora lo hago con gravatar '''
+            ''' hay que ver el tema del picture ahora lo hago con users pero en uns ervicio uy parecido a gravatar '''
             if 'email' in r:
                 h = hashlib.md5(r['email'].strip().lower().encode('utf-8')).hexdigest()
                 '''
