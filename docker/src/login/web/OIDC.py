@@ -24,6 +24,7 @@ configuration_information = {
     'token_endpoint': LOGIN_OIDC_URL + '/token',
     'userinfo_endpoint': LOGIN_OIDC_URL + '/userinfo',
     'registration_endpoint': LOGIN_OIDC_URL + '/registration',
+    'jwks_uri': LOGIN_OIDC_URL + '/jwks',
     'response_types_supported': ['code', 'id_token token'],
     'id_token_signing_alg_values_supported': [signing_key.alg],
     'response_modes_supported': ['fragment', 'query'],
@@ -139,10 +140,7 @@ class SqlAlchemyWrapper(object):
     def items(self):
         s = Session()
         try:
-            items = []
-            for i in s.query(self.clase).all():
-                items.append((i.code, json.loads(i.valor)))
-            return items
+            return [ (i.code, json.loads(i.valor)) for i in s.query(self.clase).all() ]
         finally:
             s.close()
 
