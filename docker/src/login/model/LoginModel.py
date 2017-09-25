@@ -90,7 +90,7 @@ class LoginModel:
 
             if u.telefonos != None and len(u.telefonos) > 0:
                 r['phone_number'] = u.telefonos[0].numero
-                r['phone_number_verified'] = False
+                #r['phone_number_verified'] = False
 
             ''' hay que ver el tema del picture ahora lo hago con gravatar '''
             if 'email' in r:
