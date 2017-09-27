@@ -37,7 +37,8 @@ setup(name='login-consent',
                             'google-api-python-client',
                             'httplib2',
                             'pyjwt',
-                            'pyop'],
+                            'pyop',
+                            'microservices_common'],
           entry_points={
             'console_scripts': [
                 'wamp=login.api.wamp.main:main',
