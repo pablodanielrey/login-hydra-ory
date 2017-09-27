@@ -9,7 +9,7 @@ from flask_jsontools import jsonapi
 import flask_session
 
 from login.model import LoginModel
-from login.model.engine import Session, UsersSession
+from login.model.engine import Session
 from login.model.exceptions import *
 
 from rest_utils import register_encoder
@@ -85,7 +85,7 @@ def login():
     if not usuario or not password:
         raise ClaveError()
 
-    s = UsersSession()
+    s = Session()
     try:
         rusuario = LoginModel.login(session=s, usuario=usuario, clave=password)
         if rusuario:

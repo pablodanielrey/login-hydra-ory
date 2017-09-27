@@ -5,15 +5,12 @@ import requests
 import logging
 import os
 import hashlib
+import requests
 
 import jwt
 
 from sqlalchemy import or_
 from sqlalchemy.orm import joinedload
-
-from users.model.entities import *
-from users.model.exceptions import *
-from users.model import UsersModel
 
 from .exceptions import *
 from .entities import *
@@ -22,6 +19,8 @@ from .entities import *
 class LoginModel:
 
     #HYDRA_CLAVE = os.environ['HYDRA_CLAVE']
+    USERS_API_URL = os.environ['USERS_API_URL']
+
 
     '''
     @classmethod
@@ -41,9 +40,18 @@ class LoginModel:
     def login(cls, session, usuario, clave):
         try:
             ''' se deben cheqeuar intentos de login, y disparar : SeguridadError en el caso de que se haya alcanzado el máximo de intentos '''
-            return session.query(UsuarioClave).filter(UsuarioClave.nombre_de_usuario == usuario, UsuarioClave.clave == clave).one()
+            r = requests.post(cls.USERS_API_URL + '/auth', json={'usuario':usuario, 'clave':clave})
+            if r.status_code == 200:
+                return r.json()['usuario_id']
+
+            if r.status_code == 403:
+                raise ClaveError()
+
+            if r.status_code == 404:
+                raise UsuarioNoEncontradoError()
+
         except Exception:
-            raise UsuarioNoEncontradoError()
+            raise LoginError()
             ''' chequear si hay que bloquear al usuario '''
             #raise UsuarioBloqueadoError(data={'tiempo_de_bloqueo':59})
             '''
@@ -56,8 +64,11 @@ class LoginModel:
             https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
         '''
         try:
-            usuarios = UsersModel.usuarios(session, usuario=uid)
-            u = usuarios[0]
+            r = requests.get(cls.USERS_API_URL + '/usuarios/' + uid)
+            if r.status_code != 200:
+                raise UsuarioNoEncontradoError()
+
+            u = r.json()[0]
 
             ''' lo convierto al formato esperado por OIDC '''
 
