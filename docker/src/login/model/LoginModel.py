@@ -68,45 +68,45 @@ class LoginModel:
             if r.status_code != 200:
                 raise UsuarioNoEncontradoError()
 
-            u = r.json()[0]
+            u = r.json()
 
             ''' lo convierto al formato esperado por OIDC '''
 
             r = {
-                'sub': u.id,
-                'name': u.nombre,
-                'given_name': u.nombre + ' ' + u.apellido,
-                'family_name': u.apellido,
-                'gender': u.genero,
-                'birdthdate': u.nacimiento
+                'sub': u['id'],
+                'name': u['nombre'],
+                'given_name': u['nombre'] + ' ' + u['apellido'],
+                'family_name': u['apellido'],
+                'gender': u['genero'],
+                'birdthdate': u['nacimiento']
             }
 
             r['econo'] = {
-                'id': u.id,
-                'dni': u.dni,
+                'id': u['id'],
+                'dni': u['dni'],
                 'legajo': ''
             }
 
 
             if u.ciudad or u.direccion or u.pais:
                 r['address'] = {
-                    'street_address': u.direccion,
-                    'locality': u.ciudad,
-                    'country': u.pais
+                    'street_address': u['direccion'],
+                    'locality': u['ciudad'],
+                    'country': u['pais']
                 }
 
-            if u.mails != None and len(u.mails) > 0:
-                for ma in u.mails:
-                    if ma.fecha_confirmado:
-                        r['email'] = ma.email
+            if 'mails' in u and len(u['mails']) > 0:
+                for ma in u['mails']:
+                    if ma['fecha_confirmado']:
+                        r['email'] = ma['email']
                         r['email_verified'] = True
                         break
                 else:
-                    r['email'] = u.mails[0].email
+                    r['email'] = u['mails'][0]['email']
                     r['email_verified'] = False
 
-            if u.telefonos != None and len(u.telefonos) > 0:
-                r['phone_number'] = u.telefonos[0].numero
+            if 'telefonos' in u and len(u['telefonos']) > 0:
+                r['phone_number'] = u['telefonos'][0]['numero']
                 #r['phone_number_verified'] = False
 
             ''' hay que ver el tema del picture ahora lo hago con users pero en uns ervicio uy parecido a gravatar '''
