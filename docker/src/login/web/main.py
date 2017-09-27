@@ -1,3 +1,4 @@
+import os
 import logging
 logging.getLogger().setLevel(logging.DEBUG)
 #logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
@@ -7,6 +8,7 @@ import flask
 from flask import Flask, request, send_from_directory, jsonify, redirect, session, url_for, make_response
 from flask_jsontools import jsonapi
 import flask_session
+import redis
 
 from login.model import LoginModel
 from login.model.engine import Session
@@ -24,14 +26,12 @@ from pyop.access_token import AccessToken
 from oic.oic.message import AuthorizationRequest
 from oic.oic.message import TokenErrorResponse
 from oic.oic.message import UserInfoErrorResponse
-
+from oic.oic.message import EndSessionRequest
 
 # uso should_fragment_encode pero parcheada de mi codigo
 #from pyop.util import should_fragment_encode
 #
 from .OIDC import should_fragment_encode, obtener_provider
-
-
 
 
 # set the project root directory as the static folder, you can set others.
@@ -41,7 +41,12 @@ register_encoder(app)
 app.debug = True
 app.config['SECRET_KEY'] = 'algo-secreto2'
 app.config['SESSION_COOKIE_NAME'] = 'oidc_session'
-#flask_session.Session(app)
+
+REDIS_HOST = os.environ['REDIS_HOST']
+r = redis.StrictRedis(host=REDIS_HOST, port=6379, db=0)
+app.config['SESSION_TYPE'] = 'redis'
+app.config['SESSION_REDIS'] = r
+flask_session.Session(app)
 
 provider = obtener_provider()
 
@@ -67,6 +72,11 @@ def authorization_endpoints():
             return make_response("error: {}".format(str(e)), 400)
 
     flask.session['authn_req'] = authn_req.to_dict()
+
+    #if 'usuario_id' in flask.session and flask.session['usuario_id'] is not None:
+    #    ''' usuario ya logueado redirecciono directamente a los permisos '''
+    #    return redirect(url_for('redirection_auth_endpoint'), 303)
+    #else:
     return redirect(url_for('send'), 303)
 
 
@@ -89,9 +99,9 @@ def login():
     try:
         rusuario = LoginModel.login(session=s, usuario=usuario, clave=password)
         if rusuario:
-            flask.session['usuario_id'] = rusuario.usuario_id
-            #return redirect(url_for('redirection_auth_endpoint'))
-            usuario = LoginModel.obtener_usuario(session=s, uid=rusuario.usuario_id)
+            uid = rusuario['usuario_id']
+            flask.session['usuario_id'] = uid
+            usuario = LoginModel.obtener_usuario(session=s, uid=uid)
             return {'url': url_for('redirection_auth_endpoint'), 'usuario':usuario}, 200
         else:
             raise ClaveError()
@@ -99,21 +109,34 @@ def login():
         s.close()
 
 
+@app.route('/logout')
+def end_session_endpoint():
+    end_session_request = EndSessionRequest().deserialize(request.get_data().decode('utf-8'))
+    sub = flask.session['usuario_id']
+    try:
+        provider.logout_user(sub, end_session_request)
+    except InvalidSubjectIdentifier as e:
+        return HTTPResponse('Logout unsuccessful!', content_type='text/html', status=400)
+
+    del flask.session['usuario_id']
+
+    # TODO automagic logout, should ask user first!
+    redirect_url = provider.do_post_logout_redirect(end_session_request)
+    if redirect_url:
+        return HTTPResponse(redirect_url, status=303)
+
+    return HTTPResponse('Logout successful!', content_type='text/html')
+
+
 @app.route('/finalize_auth')
 def redirection_auth_endpoint():
     user_id = flask.session['usuario_id']
     authn_req = flask.session['authn_req']
-    logging.debug(user_id)
-    logging.debug(authn_req)
 
     authn_response = provider.authorize(AuthorizationRequest().from_dict(authn_req), user_id)
-    logging.debug(authn_response)
-    logging.debug(should_fragment_encode(authn_req))
     return_url = authn_response.request(authn_req['redirect_uri'], should_fragment_encode(authn_req))
 
-    logging.debug('------------------------------')
-    logging.debug(return_url)
-    logging.debug('------------------------------')
+    del flask.session['authn_req']
 
     return redirect(return_url, 303)
 
@@ -139,11 +162,7 @@ def token_endpoint():
 
 def _userinfo_endpoint(data, headers):
     try:
-        logging.debug('userinfo')
-        logging.debug(data)
-        logging.debug(headers)
         response = provider.handle_userinfo_request(data, headers)
-        logging.debug(response)
         return response.to_json()
     except (BearerTokenError, InvalidAccessToken) as e:
         error_resp = UserInfoErrorResponse(error='invalid_token', error_description=str(e))

@@ -42,7 +42,7 @@ class LoginModel:
             ''' se deben cheqeuar intentos de login, y disparar : SeguridadError en el caso de que se haya alcanzado el máximo de intentos '''
             r = requests.post(cls.USERS_API_URL + '/auth', json={'usuario':usuario, 'clave':clave})
             if r.status_code == 200:
-                return r.json()['usuario_id']
+                return r.json()
 
             if r.status_code == 403:
                 raise ClaveError()
@@ -88,7 +88,7 @@ class LoginModel:
             }
 
 
-            if u.ciudad or u.direccion or u.pais:
+            if u['ciudad'] or u['direccion'] or u['pais']:
                 r['address'] = {
                     'street_address': u['direccion'],
                     'locality': u['ciudad'],
@@ -115,7 +115,7 @@ class LoginModel:
                 '''
                 r['picture'] = 'https://www.gravatar.com/avatar/' + h + '?s=100&d=mm'
                 '''
-                r['pircture'] = os.environ['USERS_API_URL'] + '/avatar/' + h
+                r['pircture'] = cls.USERS_API_URL + '/avatar/' + h
             return r
 
         except Exception as e:
