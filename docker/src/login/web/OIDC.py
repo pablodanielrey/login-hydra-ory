@@ -10,7 +10,7 @@ from pyop.userinfo import Userinfo
 
 from login.model import LoginModel
 from login.model.entities import AuthzCode, AccessToken, RefreshToken, SubjectIdentifier
-from login.model.engine import Session, UsersSession
+from login.model.engine import Session
 
 
 LOGIN_OIDC_URL = os.environ['LOGIN_OIDC_URL']
@@ -60,26 +60,18 @@ class UsersWrapper(object):
         raise UsuariosError()
 
     def __getitem__(self, key):
-        s = UsersSession()
-        try:
-            v = LoginModel.obtener_usuario(s, uid=key)
-            logging.debug('{} --- getitem {} --> {}'.format(self.name, key, v))
-            return v
-        finally:
-            s.close()
+        v = LoginModel.obtener_usuario(None, uid=key)
+        logging.debug('{} --- getitem {} --> {}'.format(self.name, key, v))
+        return v
 
     def __delitem__(self, key):
         logging.debug('{} --- delitem {}'.format(self.name, key))
         raise UsuariosError()
 
     def __contains__(self, key):
-        s = UsersSession()
-        try:
-            v = LoginModel.existe(s, uid=key)
-            logging.debug('{} --- contains {}'.format(self.name, key))
-            return v
-        finally:
-            s.close()
+        v = LoginModel.existe(uid=key)
+        logging.debug('{} --- contains {}'.format(self.name, key))
+        return v
 
     def items(self):
         logging.debug('{} ---  items --'.format(self.name))

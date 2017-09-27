@@ -120,9 +120,13 @@ class LoginModel:
 
         except Exception as e:
             logging.exception(e)
-            raise UsersError()
+            raise e
 
 
     @classmethod
-    def existe(cls, session, uid):
-        return UsersModel.existe(session, uid)
+    def existe(cls, uid):
+        try:
+            cls.obtener_usuario(None, uid)
+            return True
+        except Exception as e:
+            return False
