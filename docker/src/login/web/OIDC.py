@@ -191,7 +191,7 @@ client_db = DictWrapper('client_db',
             {
                 'ditesi':{
                     'client_secret': 'consumer-secret',
-                    'redirect_uris':['http://ditesi.econo.unlp.edu.ar/oidc_callback'],
+                    'redirect_uris':['http://ditesi.econo.unlp.edu.ar/oidc_callback', 'http://ditesi.econo.unlp.edu.ar:5030/oidc_callback'],
                     'response_types': ['code', 'id_token token'],
                     'token_endpoint_auth_method':'client_secret_post'
                 },
