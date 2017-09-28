@@ -191,25 +191,25 @@ client_db = DictWrapper('client_db',
             {
                 'ditesi':{
                     'client_secret': 'consumer-secret',
-                    'redirect_uris':['http://ditesi.econo.unlp.edu.ar:5030/oidc_callback'],
+                    'redirect_uris':['http://ditesi.econo.unlp.edu.ar/oidc_callback'],
                     'response_types': ['code', 'id_token token'],
                     'token_endpoint_auth_method':'client_secret_post'
                 },
                 'users':{
                     'client_secret': 'consumer-secret',
-                    'redirect_uris':['http://usuarios.econo.unlp.edu.ar:5005/oidc_callback'],
+                    'redirect_uris':['http://usuarios.econo.unlp.edu.ar/oidc_callback'],
                     'response_types': ['code', 'id_token token'],
                     'token_endpoint_auth_method':'client_secret_post'
                 },
                 'sileg': {
                     'client_secret': 'consumer-secret',
-                    'redirect_uris':['http://sileg.econo.unlp.edu.ar:5020/oidc_callback'],
+                    'redirect_uris':['http://sileg.econo.unlp.edu.ar/oidc_callback'],
                     'response_types': ['code', 'id_token token'],
                     'token_endpoint_auth_method':'client_secret_post'
                 },
                 'issues': {
                     'client_secret': 'consumer-secret',
-                    'redirect_uris':['http://issues.econo.unlp.edu.ar:5015/oidc_callback'],
+                    'redirect_uris':['http://issues.econo.unlp.edu.ar/oidc_callback'],
                     'response_types': ['code', 'id_token token'],
                     'token_endpoint_auth_method':'client_secret_post'
                 }
