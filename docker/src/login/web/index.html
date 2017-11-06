@@ -1,41 +1,41 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-  <title>Acceder</title>
+  <title>Login FCE</title>
   <meta name="viewport" content="width=device-width" />
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 
+  <!-- Angular JS -->
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/1.0.3/angular-ui-router.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-resource.js"></script>
-  <!-- Latest compiled and minified CSS -->
+  <!-- Bootstrap -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-  <!-- Optional theme -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
-  <!-- Awesome -->
-  <link rel="stylesheet" href="/libs/font-awesome-4.7.0/css/font-awesome.min.css">
+  <!-- Awesome Iconos -->
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
   <!-- Fuentes Google -->
   <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet">
 
-
+  <!-- Modulos Basicos -->
   <script src='module.js'></script>
   <script src="index.js"></script>
   <link rel="stylesheet" type="text/css" href="index.css">
-
-  <script src='componentes/login/controller.js'></script>
-  <link rel="stylesheet" type="text/css" href="componentes/login/style.css">
-
   <link rel="stylesheet" type="text/css" href="css/fce.css">
   <link rel="stylesheet" type="text/css" href="css/style.css">
 
+  <!-- Componentes del Sistema -->
+  <script src='componentes/login/controller.js'></script>
+  <link rel="stylesheet" type="text/css" href="componentes/login/style.css">
+
+  <!-- scrip para cambiar las imagenes de fondo del login -->
   <script type='text/javascript'>santyLibBgAleat=function(){this.v="1.0";this.imagenes=function(){var x=arguments,img=this.a(x);this.s(img)};this.a=function(r){var a=Math.random()*r.length;a=Math.floor(a);return(r[a])};this.c=function(b){head=document.getElementsByTagName("head")[0];if(!head)return;var s=document.createElement("style");s.type='text/css';s.innerHTML=b;head.appendChild(s)};this.s=function(b){var o=undefined;b.css=(b.css!==o)?b.css:"";b.url=(b.url!==o)?b.url:"";this.c("body{background:url('"+b.url+"') "+b.css+"}")}};$santyBA=new santyLibBgAleat();
     $santyBA.imagenes(
-    {url:"/img/imagen1.jpg"},
-    {url:"/img/imagen2.jpg"},
-    {url:"/img/imagen4.jpg"}
+    {url:"/img/imagen_fondo_login1.jpg"},
+    {url:"/img/imagen_fondo_login2.jpg"},
+    {url:"/img/imagen_fondo_login3.jpg"}
     );
   </script>
-
 
 </head>
 

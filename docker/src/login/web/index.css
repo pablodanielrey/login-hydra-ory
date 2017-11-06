@@ -3,7 +3,7 @@ html, body {
   padding: 0 !important;
   height: 100%;
   width: 100%;
-  background-image: url(img/fondo.jpg);
+  background-image: url(img/color_fondo_login.jpg);
   font-family: 'Open Sans', sans-serif;
   /*overflow: hidden;*/
 }

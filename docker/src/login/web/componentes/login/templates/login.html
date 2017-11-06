@@ -2,14 +2,14 @@
     <div class=contenedorLogin>
         <div class="subContenedorLogin">
             <div>
-              <img src="img/logo_fce.png"></img>
+              <img src="img/logo_fce_login.png"></img>
             </div><hr>
             <div>
-                    <form ng-submit='login()'>
-                      <div class="form-group"><input type='text' name='u' class="form-control" placeholder="Ingrese DNI" ng-model='usuario'></input></div>
-                      <div class="form-group"><input type='password' name='p' class="form-control" placeholder="Contraseña" ng-model='clave'></input></div>
-                      <button type='submit' ng-disabled='error.codigo == "UsuarioBloqueadoError"' class="btn btn-primary btnAcceder">Acceder</button>
-                    </form>
+                <form ng-submit='login()'>
+                  <div class="form-group"><input type='text' name='u' class="form-control" placeholder="Ingrese DNI" ng-model='usuario'></input></div>
+                  <div class="form-group"><input type='password' name='p' class="form-control" placeholder="Contraseña" ng-model='clave'></input></div>
+                  <button type='submit' ng-disabled='error.codigo == "UsuarioBloqueadoError"' class="btn btn-primary btnAcceder">Acceder</button>
+                </form>
             </div>
             <div ng-if='error.error != ""' class="contenedorErrorDeAcceso">
                 <i class="flechacontenedor fa fa-caret-up fa-2x" aria-hidden="true"></i>
@@ -29,7 +29,7 @@
                     <a class="linkAyuda" href="http://usuarios.econo.unlp.edu.ar/reset_clave/index.html"> ¿Olvidaste tu contraseña?</a><br>
                     <a class="linkAyuda" href="http://usuarios.econo.unlp.edu.ar/reset_clave/index.html"> ¿No puedes acceder?</a>
                 </div>
-                <div><img src="img/logo_unlp.png"></img></div>
+                <div><img src="img/logo_unlp_login.png"></img></div>
             </div>
         </div>
     </div>
