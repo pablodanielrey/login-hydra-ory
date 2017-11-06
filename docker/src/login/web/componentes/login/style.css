@@ -52,7 +52,7 @@ $img: nth($images, random(length($images)));*/
   width: 300px;
   /*height: 400px;*/
   margin-left: 15%;
-
+  margin-top: -70px;
 }
 
 .login .subContenedorLogin {

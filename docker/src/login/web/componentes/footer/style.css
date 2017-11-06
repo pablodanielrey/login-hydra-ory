@@ -1,0 +1,27 @@
+.pie {
+  width: 100%;
+  height: 20px;
+  background-color: #222222;
+  color: #9d9d9d;
+  font-size: 11px;
+}
+
+.pieAltrnativo {
+  width: 100%;
+  height: 20px;
+  background-color: #222222;
+  color: #9d9d9d;
+  font-size: 11px;
+}
+
+@media screen and (min-width: 719px) {
+  .pie .pieAltrnativo {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 718px) {
+  .pie .piePrincipal {
+    display: none;
+  }
+}

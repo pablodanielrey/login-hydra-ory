@@ -23,6 +23,8 @@
   <link rel="stylesheet" type="text/css" href="index.css">
   <link rel="stylesheet" type="text/css" href="css/fce.css">
   <link rel="stylesheet" type="text/css" href="css/style.css">
+  <link rel="stylesheet" type="text/css" href="componentes/header/style.css">
+  <link rel="stylesheet" type="text/css" href="componentes/footer/style.css">
 
   <!-- Componentes del Sistema -->
   <script src='componentes/login/controller.js'></script>
@@ -40,6 +42,8 @@
 </head>
 
 <body ng-app="MainApp" ng-controller="IndexCtrl">
+  <header class='cabecera' ng-include="'componentes/header/index.html'"></header>
   <div class="contenedor" ui-view></div>
+  <footer class='pie fdr fac' ng-include="'componentes/footer/index.html'"></header>
 </body>
 </html>

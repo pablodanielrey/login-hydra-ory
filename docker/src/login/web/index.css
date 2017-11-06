@@ -5,9 +5,12 @@ html, body {
   width: 100%;
   background-image: url(img/color_fondo_login.jpg);
   font-family: 'Open Sans', sans-serif;
-  /*overflow: hidden;*/
+  overflow: hidden;
 }
 
+.contenedor {
+      height: calc(100% - 70px);
+}
 
 @media screen and (max-width: 719px) {
   html, body {

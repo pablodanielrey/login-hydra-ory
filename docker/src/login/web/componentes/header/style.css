@@ -1,0 +1,14 @@
+.header {
+    background-color: #222;
+    border-color: #080808;
+    height: 50px;
+}
+
+.header a, a:hover {
+    color: #9d9d9d;
+    text-decoration: none;
+}
+
+.header .icoHeader {
+  margin: 0 10px 0 5px;
+}
