@@ -1,11 +1,6 @@
 
 app.controller("LoginCtrl", ["$scope", "$location", "$timeout","$http", "$window", "$state", function ($scope, $location, $timeout, $http, $window, $state) {
 
-  //////////////////
-  //
-  // $scope.errores_internos = ['', 'error_de_primer_acceso' , 'error_reiterado_de_acceso', 'error_usuario_bloqueado'];
-  // $scope.error_interno = 'error_usuario_bloqueado';
-
   $scope.model = {
     intentos_restantes: 5
   }
@@ -51,11 +46,6 @@ app.controller("LoginCtrl", ["$scope", "$location", "$timeout","$http", "$window
     $scope._postData('/login', {'u':$scope.usuario, 'p':$scope.clave})
             .then(function(data) {
                 console.log(data);
-                // $scope.usuario = data.data.usuario;
-                // $scope.$parent.estadoSiguiente();
-                // $timeout(function() {
-                //   $window.location.href = data.data.url;
-                // },1500);
                 $timeout(function() {
                    $window.location.href = data.data.url;
                 });

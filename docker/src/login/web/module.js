@@ -5,8 +5,6 @@ app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
 
   $urlRouterProvider.otherwise("/login");
 
-  // --- preload ----
-
   $stateProvider
   .state('login', {
     url:'/login',
@@ -19,18 +17,11 @@ app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
     controller:'LoginCtrl'
   })
   .state('login.SistemaError', {
-    url:'/sistema_error',
     templateUrl: 'componentes/login/templates/error_sistema.html',
   })
   .state('login.SeguridadError', {
-    url:'/seguridad_error',
     templateUrl: 'componentes/login/templates/error_seguridad.html',
   })
 
 
 }]);
-
-
-// app.config(['$resourceProvider', function($resourceProvider) {
-//   $resourceProvider.defaults.stripTrailingSlashes = false;
-// }]);

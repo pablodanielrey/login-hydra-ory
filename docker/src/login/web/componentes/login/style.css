@@ -7,18 +7,6 @@
   display: flex;
 }
 
-.login.error.ClaveError .errorIntentosFallidos {
-  display: block;
-}
-
-.login.error.UsuarioNoEncontradoError .errorUsuarioInexistente {
-  display: block;
-}
-
-.login.error.UsuarioBloqueadoError .errorUsuarioBloquedado {
-  display: block;
-}
-
 
 /*----- estilos de la pantalla --*/
 
@@ -102,11 +90,6 @@ $img: nth($images, random(length($images)));*/
   font-size: 10px;
 }
 
-
-
-.login .contenedorErrorDeAcceso {
-  display: none;
-}
 
 .login .erroresDeAcceso {
   padding: 10px;

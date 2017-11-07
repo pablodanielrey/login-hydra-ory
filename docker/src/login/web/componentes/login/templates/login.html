@@ -13,15 +13,15 @@
             </div>
             <div ng-if='error.error != ""' class="contenedorErrorDeAcceso">
                 <i class="flechacontenedor fa fa-caret-up fa-2x" aria-hidden="true"></i>
-                <div class="erroresDeAcceso errorUsuarioInexistente">
+                <div class="erroresDeAcceso">
                   Nombre de usuario y/o contraseña incorrectos.
                 </div>
-                <div class="erroresDeAcceso errorIntentosFallidos">
+                <!-- <div class="erroresDeAcceso errorIntentosFallidos">
                   Nombre de usuario y/o contraseña incorrectos. Te quedan <b>{{model.intentos_restantes}}</b> intentos.
                 </div>
                 <div class="erroresDeAcceso errorUsuarioBloquedado">
                   <b>Usuario bloqueado</b> por <b>{{model.tiempo_de_bloqueo}} minutos</b> debido a reiterados intentos de acceso fallidos.
-                </div>
+                </div> -->
             </div>
             <hr>
             <div class="footerLogin">
