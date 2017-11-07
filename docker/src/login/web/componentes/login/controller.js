@@ -10,6 +10,8 @@ app.controller("LoginCtrl", ["$scope", "$location", "$timeout","$http", "$window
     intentos_restantes: 5
   }
 
+  $scope.error = "";
+
   /*
   $scope.restar_intentos = function() {
     $scope.model.intentos_restantes = $scope.model.intentos_restantes - 1;
@@ -64,6 +66,8 @@ app.controller("LoginCtrl", ["$scope", "$location", "$timeout","$http", "$window
                  $scope.$parent.setearError({error:'SistemaError'});
                  return;
                }
+
+               $scope.error = data.data.error;
 
                if (data.data.error == 'UsuarioBloqueadoError') {
                  $scope.model.tiempo_de_bloqueo = data.data.data.tiempo_de_bloqueo;
