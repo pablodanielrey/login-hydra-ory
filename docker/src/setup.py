@@ -12,7 +12,7 @@
 from setuptools import setup, find_packages
 
 setup(name='login-consent',
-          version='0.1.0.dev0',
+          version='1.0.0.alpha0',
           description='Proyecto que maneja el equema de usuarios de los sistemas',
           url='https://github.com/pablodanielrey/login-hydra-ory',
           author='Desarrollo DiTeSi, FCE',
