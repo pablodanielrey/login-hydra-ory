@@ -7,7 +7,7 @@
             <div>
                 <form ng-submit='login()'>
                   <div class="form-group"><input type='text' name='u' class="form-control" placeholder="Ingrese DNI" ng-model='usuario'></input></div>
-                  <div class="form-group"><input type='password' name='p' class="form-control" placeholder="Contraseña" ng-model='clave'></input></div>
+                  <div class="form-group"><input type='password' name='p' class="form-control" ng-change='limpiar_error()' placeholder="Contraseña" ng-model='clave'></input></div>
                   <button type='submit' ng-disabled='error.codigo == "UsuarioBloqueadoError"' class="btn btn-primary btnAcceder">Acceder</button>
                 </form>
             </div>

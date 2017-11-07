@@ -21,6 +21,12 @@ app.controller("LoginCtrl", ["$scope", "$location", "$timeout","$http", "$window
   $timeout($scope.restar_intentos,1000);
 */
 
+
+  $scope.limpiar_error = function() {
+    $scope.error.error = '';
+  }
+
+
   /*
     hace post de los datos en urlencoded formato. a la url especificada
     usanod el challenge si esta seteado
