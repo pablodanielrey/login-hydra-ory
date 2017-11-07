@@ -70,7 +70,8 @@ app.controller("LoginCtrl", ["$scope", "$location", "$timeout","$http", "$window
                }
 
                if (data.data.error == 'ClaveError') {
-                 $scope.model.intentos_restantes = data.data.data.intentos_restantes;
+                 //$scope.model.intentos_restantes = data.data.data.intentos_restantes;
+                 $scope.model.intentos_restantes = 0;
                }
 
                $scope.$parent.setearError(data.data);
