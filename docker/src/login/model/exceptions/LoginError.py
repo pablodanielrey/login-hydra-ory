@@ -21,9 +21,9 @@ class UsuarioNoEncontradoError(LoginError):
 
 class ClaveError(LoginError):
     def __init__(self, data=None):
-        super().__init__(status_code=500, data=data)
+        super().__init__(status_code=404, data=data)
 
 
 class UsuarioBloqueadoError(LoginError):
     def __init__(self, data=None):
-        super().__init__(status_code=500, data=data)
+        super().__init__(status_code=404, data=data)
