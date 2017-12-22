@@ -32,8 +32,27 @@ services:
       SYSTEM_SECRET: y82XL-wAPCCZu+B4
       DATABASE_URL: postgres://hydra:hydra@db:5432/hydra?sslmode=disable
       ISSUER: https://localhost:9000/
-      CONSENT_URL: http://localhost:9020/consent
+      CONSENT_URL: http://localhost/login
       FORCE_ROOT_CLIENT_CREDENTIALS: admin:demo-password
+    networks:
+      - webnet
+
+  redis:
+    image: redis
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+    ports:
+      - 6379:6379
+    networks:
+      - webnet
+
+  consent-app:
+    image: login-consent-hydra
+    ports:
+      - 80:5000
+    environment:
+      REDIS_HOST: redis
     networks:
       - webnet
 
