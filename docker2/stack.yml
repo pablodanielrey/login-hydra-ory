@@ -1,5 +1,6 @@
 version: "3.4"
 services:
+
   db:
     image: postgres
     ports:
@@ -16,6 +17,12 @@ services:
     networks:
       - webnet
 
+  adminer:
+    image: adminer
+    ports:
+      - 8989:8080
+    networks:
+      - webnet
 
   ory-hydra:
     image: oryd/hydra
@@ -30,11 +37,10 @@ services:
     networks:
       - webnet
 
-
   visualizer:
     image: dockersamples/visualizer:stable
     ports:
-      - "8080:8080"
+      - "8888:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
     deploy:
