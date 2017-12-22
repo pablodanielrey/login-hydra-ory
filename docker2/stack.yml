@@ -1,0 +1,48 @@
+version: "3.4"
+services:
+  db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - /srv/docker/postgresql/data:/var/lib/postgresql/data
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+    environment:
+      POSTGRES_DB: hydra
+      POSTGRES_USER: hydra
+      POSTGRES_PASSWORD: hydra
+    networks:
+      - webnet
+
+
+  ory-hydra:
+    image: oryd/hydra
+    ports:
+      - "9000:4444"
+    environment:
+      SYSTEM_SECRET: y82XL-wAPCCZu+B4
+      DATABASE_URL: postgres://hydra:hydra@db:5432/hydra?sslmode=disable
+      ISSUER: https://localhost:9000/
+      CONSENT_URL: http://localhost:9020/consent
+      FORCE_ROOT_CLIENT_CREDENTIALS: admin:demo-password
+    networks:
+      - webnet
+
+
+  visualizer:
+    image: dockersamples/visualizer:stable
+    ports:
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+    networks:
+      - webnet
+
+networks:
+  webnet:
+    attachable: true
