@@ -51,6 +51,8 @@ services:
     image: login-consent-hydra
     ports:
       - 80:5000
+    volumes:
+      - "/home/pablo/github/econo2/login-hydra-ory/docker2/src/login:/src/login"
     environment:
       REDIS_HOST: redis
     networks:

@@ -1,5 +1,5 @@
 #
-#
+# https://www.ory.am/run-oauth2-server-open-source-api-security
 # https://ory.gitbooks.io/hydra/content/images/consent-flow.svg
 # https://ory.gitbooks.io/hydra/content/oauth2.html#consent-flow
 
@@ -23,16 +23,16 @@ app.debug = True
 #app.config['SECRET_KEY'] = 'algo-secreto2'
 #app.config['SESSION_COOKIE_NAME'] = 'oidc_session'
 
-REDIS_HOST = os.environ['REDIS_HOST']
-r = redis.StrictRedis(host=REDIS_HOST, port=6379, db=0)
-app.config['SESSION_TYPE'] = 'redis'
-app.config['SESSION_REDIS'] = r
-flask_session.Session(app)
+#REDIS_HOST = os.environ['REDIS_HOST']
+#r = redis.StrictRedis(host=REDIS_HOST, port=6379, db=0)
+#app.config['SESSION_TYPE'] = 'redis'
+#app.config['SESSION_REDIS'] = r
+#flask_session.Session(app)
 
 @app.route('/login')
 def login():
     consent = request.args.get('consent', None, str)
-    
+    return make_response(consent if consent else 'None', 200, {'content_type':'text/html'})
 
     #flask.session['consent'] =
 
@@ -40,13 +40,13 @@ def login():
     #    ''' usuario ya logueado redirecciono directamente a los permisos '''
     #    return redirect(url_for('redirection_auth_endpoint'), 303)
     #else:
-    return redirect(url_for('send'), 303)
+    #return redirect(url_for('send'), 303)
 
 @app.route('/logout')
-def end_session_endpoint():
+def logout():
     if 'usuario_id' in flask.session:
         del flask.session['usuario_id']
-    return HTTPResponse('Logout successful!', content_type='text/html', status=200)
+    return make_response('Logout successful!', 200, {'content_type':'text/html'})
 
 """
 @app.route('/', methods=['GET'], defaults={'path':None})

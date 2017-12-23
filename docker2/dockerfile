@@ -1,0 +1,24 @@
+FROM python:3.6.2-stretch
+
+RUN apt-get update && apt-get install -y \
+  postgresql-server-dev-all \
+  supervisor \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
+ENV TZ=America/Argentina/Buenos_Aires
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+COPY pip.conf /etc/
+COPY entrypoint.sh /
+COPY supervisor/scron.conf /etc/supervisor/conf.d
+COPY supervisor/srsyslog.conf /etc/supervisor/conf.d
+COPY supervisor/srest.conf /etc/supervisor/conf.d
+COPY supervisor/sflask.conf /etc/supervisor/conf.d
+
+ADD src.tar.gz /
+RUN cd /src && pip3 install --trusted-host pypi.econo.unlp.edu.ar --upgrade -e .
+
+WORKDIR /src
+
+ENTRYPOINT ["/entrypoint.sh"]
