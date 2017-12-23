@@ -1,0 +1,8 @@
+para poder analizar los consents la app debe requerir un token de acceso.
+client credentials flow.
+
+curl -s -k -X POST -H "Content-Type: application/x-www-form-urlencoded" -d grant_type=client_credentials -d scope=hydra.consent -u 'admin:demo-password' https://192.168.0.3:9000/oauth2/token
+
+
+ejemplos en curl de consutlas a hydra
+https://github.com/ory/hydra/issues/405

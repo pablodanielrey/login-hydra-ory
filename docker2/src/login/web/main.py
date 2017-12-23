@@ -6,6 +6,7 @@
 import os
 import logging
 logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger().propagate = True
 #logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 #logging.basicConfig(level=logging.DEBUG)
 
@@ -17,6 +18,7 @@ import redis
 
 import oauthlib
 import requests
+from requests.auth import HTTPBasicAuth
 
 #import urllib.parse
 
@@ -25,11 +27,43 @@ app = Flask(__name__, static_url_path='/src/login/web')
 app.debug = True
 #app.config['SECRET_KEY'] = 'algo-secreto2'
 #app.config['SESSION_COOKIE_NAME'] = 'oidc_session'
+import sys
+log = logging.getLogger()
+log.addHandler(logging.StreamHandler(sys.stdout))
+log.setLevel(logging.DEBUG)
 
 HYDRA_HOST = os.environ['HYDRA_HOST']
 HYDRA_CLIENT_ID = os.environ['HYDRA_CLIENT_ID']
 HYDRA_CLIENT_SECRET = os.environ['HYDRA_CLIENT_SECRET']
 
+def obtener_token():
+    client_id = HYDRA_CLIENT_ID
+    client_secret = HYDRA_CLIENT_SECRET
+    auth = HTTPBasicAuth(client_id, client_secret)
+
+    data = {
+        'grant_type':'client_credentials',
+        'scope':'hydra.consent'
+    }
+    headers = {
+        'Accept':'application/json'
+    }
+    url = HYDRA_HOST + '/oauth2/token'
+    r = requests.post(url, auth=auth, verify=False, headers=headers, data=data)
+    return r.json()
+
+def verificar_consent(token, consent_id):
+    url = HYDRA_HOST + '/oauth2/consent/requests/' + consent_id
+    headers = {
+        'Authorization': 'bearer {}'.format(token),
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    }
+    r = requests.get(url, verify=False, headers=headers)
+    return r
+
+
+"""
 def obtener_token():
     #https://requests-oauthlib.readthedocs.io/en/latest/oauth2_workflow.html#backend-application-flow
     from oauthlib.oauth2 import BackendApplicationClient
@@ -38,14 +72,14 @@ def obtener_token():
 
     client_id = HYDRA_CLIENT_ID
     client_secret = HYDRA_CLIENT_SECRET
-    scope = 'hydra.consent'
+    scopes = ['hydra.consent']
 
     auth = HTTPBasicAuth(client_id, client_secret)
     client = BackendApplicationClient(client_id=client_id)
-    oauth = OAuth2Session(client=client, scope=[scope])
-    token = oauth.fetch_token(token_url=HYDRA_HOST + '/oauth2/token', auth=auth, verify=False, scope=[scope])
-    return oauth
-
+    oauth = OAuth2Session(client=client, scope=scopes)
+    token = oauth.fetch_token(token_url=HYDRA_HOST + '/oauth2/token', auth=auth, verify=False)
+    return oauth, token
+"""
 
 REDIS_HOST = os.environ['REDIS_HOST']
 r = redis.StrictRedis(host=REDIS_HOST, port=6379, db=0)
@@ -61,13 +95,13 @@ def obtener_consent():
     return consent
 
 def hydra_obtener_consent(id):
-
-    oauth = obtener_token()
-    r = oauth.get(HYDRA_HOST + '/oauth2/consent/requests/' + id, verify=False)
-    if not r.ok:
-        return r.text
-        #raise Exception()
-    return r.json()
+    import json
+    token = obtener_token()
+    tk = token['access_token']
+    r = verificar_consent(tk, id)
+    if r.status_code == 200:
+        return r.json()
+    return None
 
 @app.route('/login', methods=['GET'])
 def login():
@@ -91,7 +125,11 @@ def authorize():
     if not consent_id:
         return make_response('unauthorized', 401)
 
-    return make_response(hydra_obtener_consent(consent_id), 200)
+    consent = hydra_obtener_consent(consent_id)
+    if not consent:
+        return make_response('No autorizado', 401)
+
+    return make_response(consent, 200)
     #getOAuth2ConsentRequest
     #return render_template('authorize.html')
 
