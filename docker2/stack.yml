@@ -55,6 +55,9 @@ services:
       - "/home/pablo/github/econo2/login-hydra-ory/docker2/src/login:/src/login"
     environment:
       REDIS_HOST: redis
+      HYDRA_HOST: https://192.168.0.3:9000
+      HYDRA_CLIENT_ID: consent-app
+      HYDRA_CLIENT_SECRET: consent-secret
     networks:
       - webnet
 

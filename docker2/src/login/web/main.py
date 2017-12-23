@@ -10,10 +10,13 @@ logging.getLogger().setLevel(logging.DEBUG)
 #logging.basicConfig(level=logging.DEBUG)
 
 import flask
-from flask import Flask, request, send_from_directory, jsonify, redirect, session, url_for, make_response
+from flask import Flask, request, send_from_directory, jsonify, redirect, session, url_for, make_response, render_template
 from flask_jsontools import jsonapi
 import flask_session
 import redis
+
+import oauthlib
+import requests
 
 #import urllib.parse
 
@@ -23,24 +26,82 @@ app.debug = True
 #app.config['SECRET_KEY'] = 'algo-secreto2'
 #app.config['SESSION_COOKIE_NAME'] = 'oidc_session'
 
-#REDIS_HOST = os.environ['REDIS_HOST']
-#r = redis.StrictRedis(host=REDIS_HOST, port=6379, db=0)
-#app.config['SESSION_TYPE'] = 'redis'
-#app.config['SESSION_REDIS'] = r
-#flask_session.Session(app)
+HYDRA_HOST = os.environ['HYDRA_HOST']
+HYDRA_CLIENT_ID = os.environ['HYDRA_CLIENT_ID']
+HYDRA_CLIENT_SECRET = os.environ['HYDRA_CLIENT_SECRET']
 
-@app.route('/login')
+def obtener_token():
+    #https://requests-oauthlib.readthedocs.io/en/latest/oauth2_workflow.html#backend-application-flow
+    from oauthlib.oauth2 import BackendApplicationClient
+    from requests_oauthlib import OAuth2Session
+    from requests.auth import HTTPBasicAuth
+
+    client_id = HYDRA_CLIENT_ID
+    client_secret = HYDRA_CLIENT_SECRET
+    scope = 'hydra.consent'
+
+    auth = HTTPBasicAuth(client_id, client_secret)
+    client = BackendApplicationClient(client_id=client_id)
+    oauth = OAuth2Session(client=client, scope=[scope])
+    token = oauth.fetch_token(token_url=HYDRA_HOST + '/oauth2/token', auth=auth, verify=False, scope=[scope])
+    return oauth
+
+
+REDIS_HOST = os.environ['REDIS_HOST']
+r = redis.StrictRedis(host=REDIS_HOST, port=6379, db=0)
+app.config['SESSION_TYPE'] = 'redis'
+app.config['SESSION_REDIS'] = r
+flask_session.Session(app)
+
+
+def obtener_consent():
+    consent = flask.session.get('consent', None)
+    if not consent:
+        consent = request.args.get('consent', None, str)
+    return consent
+
+def hydra_obtener_consent(id):
+
+    oauth = obtener_token()
+    r = oauth.get(HYDRA_HOST + '/oauth2/consent/requests/' + id, verify=False)
+    if not r.ok:
+        return r.text
+        #raise Exception()
+    return r.json()
+
+@app.route('/login', methods=['GET'])
 def login():
-    consent = request.args.get('consent', None, str)
-    return make_response(consent if consent else 'None', 200, {'content_type':'text/html'})
+    consent_id = obtener_consent()
+    if not consent_id:
+        return make_response('unauthorized', 401)
+    flask.session['consent'] = consent_id
+    return render_template('login.html')
 
-    #flask.session['consent'] =
+@app.route('/login', methods=['POST'])
+def do_login():
+    usuario = request.form.get('usuario', None)
+    clave = request.form.get('clave', None)
+    #aca se debe chequear los datos de login y sino tirar error.
+    #return render_template('login_ok.html', usuario=usuario)
+    return redirect(url_for('authorize'), 303)
 
-    #if 'usuario_id' in flask.session and flask.session['usuario_id'] is not None:
-    #    ''' usuario ya logueado redirecciono directamente a los permisos '''
-    #    return redirect(url_for('redirection_auth_endpoint'), 303)
-    #else:
-    #return redirect(url_for('send'), 303)
+@app.route('/authorize', methods=['GET'])
+def authorize():
+    consent_id = obtener_consent()
+    if not consent_id:
+        return make_response('unauthorized', 401)
+
+    return make_response(hydra_obtener_consent(consent_id), 200)
+    #getOAuth2ConsentRequest
+    #return render_template('authorize.html')
+
+@app.route('/authorize', methods=['POST'])
+def do_authorize():
+    consent_id = obtener_consent()
+    if not consent_id:
+        return make_response('unauthorized', 401)
+    return render_template('authorize.html')
+
 
 @app.route('/logout')
 def logout():

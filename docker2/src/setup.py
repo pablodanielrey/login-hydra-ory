@@ -35,7 +35,10 @@ setup(name='login-consent',
                             'Flask-Session',
                             'SQLAlchemy',
                             'httplib2',
-                            'pyjwt'
+                            'pyjwt',
+                            'oauthlib',
+                            'cryptography',
+                            'requests_oauthlib'
                             ],
           entry_points={
             'console_scripts': [
