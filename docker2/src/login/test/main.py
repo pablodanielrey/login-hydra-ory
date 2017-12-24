@@ -15,24 +15,26 @@ app.debug = True
 app.config['SECRET_KEY'] = 'algo-secreto'
 app.config['SESSION_COOKIE_NAME'] = 'users_session'
 
-oidc = OIDC()
+oidc = OIDC('consumer-test', 'consumer-secret')
 
 @app.route('/oauth2', methods=['GET'])
 def callback():
     error = request.args.get('error', None, str)
     if error:
         desc = request.args.get('error_description', '', str)
-        return make_response(error + '<br>' + desc, 403)
-
+        return make_response(error + '<br>' + desc, 401)
+    state_r = request.args.get('state', None, str)
+    if 'algo123456' != state_r:
+        return make_response('estados no coincidentes', 401)
     token = oidc.callback(request.args)
     if not token:
-        return make_response('error', 500)
+        return make_response('error', 401)
     return make_response('ok', 200)
 
 @app.route('/', methods=['GET'], defaults={'path':None})
 @app.route('/<path:path>', methods=['GET'])
 def send(path):
-    r = oidc.auth_token('consumer-test', ['openid','offline','hydra.clients'])
+    r = oidc.auth_token(state='algo123456', scopes=['openid','offline','hydra.clients'])
     return redirect(r,302)
 
 @app.after_request

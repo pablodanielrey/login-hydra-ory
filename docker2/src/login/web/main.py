@@ -162,9 +162,13 @@ def login():
     consent_id = obtener_consent_id()
     if not consent_id:
         return make_response('unauthorized', 401)
-
     flask.session['consent'] = consent_id
+
+    usuario_id = flask.session.get('usuario_id',None)
+    if usuario_id:
+        return redirect(url_for('authorize'), 303)
     return render_template('login.html')
+
 
 @app.route('/login', methods=['POST'])
 def do_login():
@@ -172,9 +176,8 @@ def do_login():
     clave = request.form.get('clave', None)
     #aca se debe chequear los datos de login y sino tirar error.
     #return render_template('login_ok.html', usuario=usuario)
+    flask.session['usuario_id'] = usuario
     return redirect(url_for('authorize'), 303)
-
-
 
 @app.route('/authorize', methods=['GET'])
 def authorize():
