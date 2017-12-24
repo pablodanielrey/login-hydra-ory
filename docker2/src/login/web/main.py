@@ -195,7 +195,12 @@ def authorize():
             "redirectUrl": "https://192.168.0.3:9000/oauth2/auth?client_id=consumer-test&response_type=code&redirect_uri=http%3A%2F%2F127.0.0.1%3A81%2Foauth2&scope=openid+offline+hydra.clients&state=algodealgo&consent=8dc077f1-4bd2-4f51-94f7-483e2a51aac8"
         }
     '''
-    return render_template('authorize.html', scopes=consent['requestedScopes'])
+    if flask.session.get('autorizado', False):
+        tk = obtener_token()
+        r = aceptar_consent(tk, consent)
+        return redirect(consent['redirectUrl'])
+    else:
+        return render_template('authorize.html', scopes=consent['requestedScopes'])
 
 
 @app.route('/authorize', methods=['POST'])
@@ -211,6 +216,7 @@ def do_authorize():
         r = denegar_consent(tk, consent)
     else:
         r = aceptar_consent(tk, consent)
+        flask.session['autorizado'] = True
 
     if not r or not r.ok:
         return (r.text, r.status_code, r.headers.items())
