@@ -227,7 +227,19 @@ def do_authorize():
 def logout():
     if 'usuario_id' in flask.session:
         del flask.session['usuario_id']
+    if 'autorizado' in flask.session:
+        del flask.session['autorizado']
     return make_response('Logout successful!', 200, {'content_type':'text/html'})
+
+
+@app.route('/', methods=['GET'])
+@jsonapi
+def info():
+    data = {
+        'usuario_id': flask.session.get('usuario_id', ''),
+        'autorizado': flask.session.get('autorizado', '')
+    }
+    return (data, 200)
 
 """
 @app.route('/', methods=['GET'], defaults={'path':None})

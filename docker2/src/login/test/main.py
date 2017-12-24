@@ -6,14 +6,25 @@ import redis
 import flask
 from flask import Flask, request, send_from_directory, jsonify, redirect, url_for, make_response
 from flask_jsontools import jsonapi
+import flask_session
 
-from oidc import OIDC
+import json
+import requests
+
+from oidc import OIDC, ResourceServer
 
 # set the project root directory as the static folder, you can set others.
 app = Flask(__name__, static_url_path='/src/users/web')
 app.debug = True
 app.config['SECRET_KEY'] = 'algo-secreto'
 app.config['SESSION_COOKIE_NAME'] = 'users_session'
+
+REDIS_HOST = os.environ['REDIS_HOST']
+r = redis.StrictRedis(host=REDIS_HOST, port=6379, db=0)
+app.config['SESSION_TYPE'] = 'redis'
+app.config['SESSION_REDIS'] = r
+flask_session.Session(app)
+
 
 oidc = OIDC('consumer-test', 'consumer-secret')
 
@@ -29,13 +40,34 @@ def callback():
     token = oidc.callback(request.args)
     if not token:
         return make_response('error', 401)
-    return make_response('ok', 200)
 
-@app.route('/', methods=['GET'], defaults={'path':None})
-@app.route('/<path:path>', methods=['GET'])
-def send(path):
+    flask.session['token'] = token
+
+    return make_response(json.dumps(token), 200)
+
+@app.route('/', methods=['GET'])
+def send():
     r = oidc.auth_token(state='algo123456', scopes=['openid','offline','hydra.clients'])
     return redirect(r,302)
+
+
+@app.route('/r', methods=['GET'])
+def get_resource():
+    r = None
+    token = request.args.get('token',None,str)
+    if not token:
+        token = flask.session.get('token',None)
+
+    if token:
+        logging.debug(token)
+        headers = {
+            'Authorization': 'Bearer {}'.format(token)
+        }
+        r = requests.get('http://127.0.0.1:5001/api/r1', headers=headers)
+    else:
+        r = requests.get('http://127.0.0.1:5001/api/r1')
+    return (r.text, r.status_code, r.headers.items())
+
 
 @app.after_request
 def add_header(r):

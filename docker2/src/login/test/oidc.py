@@ -62,3 +62,57 @@ class OIDC:
         token['scope']
         token['token_type']
         return token
+
+class ResourceServer:
+
+    introspect_url = os.environ['HYDRA_HOST'] + '/oauth2/introspect'
+
+    def __init__(self, client_id, client_secret, realm='', verify=False):
+        self.realm = realm
+        self.verify = verify
+        self.client_id = client_id
+        self.client_secret = client_secret
+
+    def bearer_token(self, headers):
+        if 'Authorization' in headers:
+            auth = headers['Authorization'].split(' ')
+            if auth[0].lower() == 'bearer':
+                return auth[1]
+        return None
+
+    def introspect_token(self, token, scopes=[]):
+        auth = HTTPBasicAuth(self.client_id, self.client_secret)
+        data = {
+            'token':token
+        }
+        if len(scopes) > 0:
+            data['scope'] = ' '.join(scopes)
+        headers = {
+            'Accept':'application/json'
+        }
+        r = requests.post(self.introspect_url, verify=self.verify, allow_redirects=False, auth=auth, headers=headers, data=data)
+        if not r.ok:
+            return None
+        return r.json()
+
+
+    def invalid_request(self):
+        return self.require_auth(text='Bad Request', error='invalid_request', status=400)
+
+    def invalid_token(self):
+        return self.require_auth(text='Unauthorized', error='invalid_token', status=401)
+
+    def insufficient_scope(self):
+        return self.require_auth(text='Forbidden', error='insufficient_scope', status=403)
+
+    def require_auth(self, text='Unauthorized', error=None, status=401, error_description=''):
+        headers = None
+        if error:
+            headers = {
+                'WWW-Authenticate': 'Basic realm=\"{}\", error=\"{}\", error_description:\"{}\"'.format(self.realm, error, error_description)
+            }
+        else:
+            headers = {
+                'WWW-Authenticate': 'Basic realm=\"{}\"'.format(self.realm)
+            }
+        return (text, status, headers)

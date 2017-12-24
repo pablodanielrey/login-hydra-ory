@@ -66,6 +66,7 @@ services:
     image: login-consent-hydra
     ports:
       - 81:5000
+      - 82:5001
     volumes:
       - "/home/pablo/github/econo2/login-hydra-ory/docker2/src/login:/src/login"
     environment:
