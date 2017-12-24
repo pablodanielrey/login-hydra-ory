@@ -15,6 +15,7 @@ from flask import Flask, request, send_from_directory, jsonify, redirect, sessio
 from flask_jsontools import jsonapi
 import flask_session
 import redis
+import json
 
 import oauthlib
 import requests
@@ -40,7 +41,6 @@ def obtener_token():
     client_id = HYDRA_CLIENT_ID
     client_secret = HYDRA_CLIENT_SECRET
     auth = HTTPBasicAuth(client_id, client_secret)
-
     data = {
         'grant_type':'client_credentials',
         'scope':'hydra.consent'
@@ -49,11 +49,38 @@ def obtener_token():
         'Accept':'application/json'
     }
     url = HYDRA_HOST + '/oauth2/token'
-    r = requests.post(url, auth=auth, verify=False, headers=headers, data=data)
-    return r.json()
+    r = requests.post(url, verify=False, auth=auth, headers=headers, data=data)
+    return r.json()['access_token']
 
 def verificar_consent(token, consent_id):
     url = HYDRA_HOST + '/oauth2/consent/requests/' + consent_id
+    headers = {
+        'Authorization': 'bearer {}'.format(token),
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    }
+    r = requests.get(url, verify=False, headers=headers)
+    return r
+
+
+
+def aceptar_consent(token, consent, usuario={'id':'','name':'','nickname':'','email':'','email_verified':''}):
+    url = HYDRA_HOST + '/oauth2/consent/requests/' + consent['id'] + '/accept'
+    headers = {
+        'Authorization': 'bearer {}'.format(token),
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    }
+    data = {
+        'subject': 'sdfdsfsdfsdlkfs',
+        'grantScopes': consent['requestedScopes'],
+        'accessTokenExtra':  {}
+    }
+    r = requests.patch(url, verify=False, headers=headers, json=data)
+    return r
+
+def denegar_consent(token, consent_id):
+    url = HYDRA_HOST + '/oauth2/consent/requests/' + consent_id + '/reject'
     headers = {
         'Authorization': 'bearer {}'.format(token),
         'Content-Type': 'application/json',
@@ -94,14 +121,11 @@ def obtener_consent():
         consent = request.args.get('consent', None, str)
     return consent
 
-def hydra_obtener_consent(id):
-    import json
-    token = obtener_token()
-    tk = token['access_token']
-    r = verificar_consent(tk, id)
-    if r.status_code == 200:
-        return r.json()
-    return None
+
+
+
+
+
 
 @app.route('/login', methods=['GET'])
 def login():
@@ -125,17 +149,39 @@ def do_login():
     #return render_template('login_ok.html', usuario=usuario)
     return redirect(url_for('authorize'), 303)
 
+
+def hydra_obtener_consent(tk, id):
+    r = verificar_consent(tk, id)
+    if r.status_code == 200:
+        return r.json()
+    return None
+
 @app.route('/authorize', methods=['GET'])
 def authorize():
     consent_id = obtener_consent()
     if not consent_id:
         return make_response('unauthorized', 401)
 
-    consent = hydra_obtener_consent(consent_id)
+    tk = obtener_token()
+    consent = hydra_obtener_consent(tk, consent_id)
     if not consent:
         return make_response('No autorizado', 401)
 
-    return make_response(consent, 200)
+    '''
+        debo analizar el conset y verificarlo o rechazarlo.
+        ej:
+        {
+            "id": "8dc077f1-4bd2-4f51-94f7-483e2a51aac8",
+            "requestedScopes": ["openid", "offline", "hydra.clients"],
+            "clientId": "consumer-test",
+            "expiresAt": "2017-12-24T02:29:24.485681Z",
+            "redirectUrl": "https://192.168.0.3:9000/oauth2/auth?client_id=consumer-test&response_type=code&redirect_uri=http%3A%2F%2F127.0.0.1%3A81%2Foauth2&scope=openid+offline+hydra.clients&state=algodealgo&consent=8dc077f1-4bd2-4f51-94f7-483e2a51aac8"
+        }
+    '''
+
+    tk = obtener_token()
+    r = aceptar_consent(tk, consent)
+    return make_response(r.text,200)
     #getOAuth2ConsentRequest
     #return render_template('authorize.html')
 
