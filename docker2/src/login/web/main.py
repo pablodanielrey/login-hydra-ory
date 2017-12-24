@@ -181,7 +181,15 @@ def authorize():
 
     tk = obtener_token()
     r = aceptar_consent(tk, consent)
-    return make_response(r.text,200)
+    logging.debug(r)
+    if not r.ok:
+        resp = make_response(r.text,r.status_code)
+        for h in r.headers:
+            resp.headers[h] = r.headers[h]
+            return resp
+
+    return redirect(consent['redirectUrl'], 303)
+
     #getOAuth2ConsentRequest
     #return render_template('authorize.html')
 

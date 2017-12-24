@@ -17,8 +17,11 @@ app.config['SESSION_COOKIE_NAME'] = 'users_session'
 
 @app.route('/oauth2', methods=['GET'])
 def callback():
-    logging.debug(request.args)
-    return make_response(request.args, 200)
+    error = request.args.get('error', None, str)
+    if error:
+        desc = request.args.get('error_description', '', str)
+        return make_response(error + '<br>' + desc,500)
+    return make_response('ok', 200)
 
 @app.route('/', methods=['GET'], defaults={'path':None})
 @app.route('/<path:path>', methods=['GET'])
