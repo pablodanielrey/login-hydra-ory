@@ -15,27 +15,25 @@ app.debug = True
 app.config['SECRET_KEY'] = 'algo-secreto'
 app.config['SESSION_COOKIE_NAME'] = 'users_session'
 
+oidc = OIDC()
+
 @app.route('/oauth2', methods=['GET'])
 def callback():
     error = request.args.get('error', None, str)
-    logging.debug('--callback--')
     if error:
         desc = request.args.get('error_description', '', str)
         return make_response(error + '<br>' + desc, 403)
+
+    token = oidc.callback(request.args)
+    if not token:
+        return make_response('error', 500)
     return make_response('ok', 200)
 
 @app.route('/', methods=['GET'], defaults={'path':None})
 @app.route('/<path:path>', methods=['GET'])
 def send(path):
-    logging.debug(url_for('callback'))
-
-    oidc = OIDC()
-    r = oidc.auth_token('consumer-test', 'http://127.0.0.1:81' + url_for('callback'), ['openid','offline','hydra.clients'])
-
+    r = oidc.auth_token('consumer-test', ['openid','offline','hydra.clients'])
     return redirect(r,302)
-    """
-    return (r.text, r.status_code, r.headers.items())
-    """
 
 @app.after_request
 def add_header(r):

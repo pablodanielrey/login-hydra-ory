@@ -82,14 +82,22 @@ def aceptar_consent(token, consent, usuario={'id':'','name':'','nickname':'','em
     r = requests.patch(url, verify=False, allow_redirects=False, headers=headers, json=data)
     return r
 
-def denegar_consent(token, consent_id):
-    url = HYDRA_HOST + '/oauth2/consent/requests/' + consent_id + '/reject'
+def denegar_consent(token, consent):
+    url = HYDRA_HOST + '/oauth2/consent/requests/' + consent['id'] + '/reject'
     headers = {
         'Authorization': 'bearer {}'.format(token),
         'Content-Type': 'application/json',
         'Accept': 'application/json'
     }
-    r = requests.get(url, verify=False, allow_redirects=False, headers=headers)
+    data = {
+        'subject': 'sdfdsfsdfsdlkfs',
+        'grantScopes': consent['requestedScopes'],
+        #'accessTokenExtra':  {}
+        'authTime': 0
+        #'idTokenExtra': { 'prop1': 'algo' },
+        #'providedAcr': 'algo',
+    }
+    r = requests.patch(url, verify=False, allow_redirects=False, headers=headers, json=data)
     return r
 
 
@@ -118,10 +126,28 @@ app.config['SESSION_REDIS'] = r
 flask_session.Session(app)
 
 
-def obtener_consent():
+def obtener_consent_id():
     consent = request.args.get('consent', None, str)
     if not consent:
         consent = flask.session.get('consent', None)
+    return consent
+
+def obtener_consent():
+    id = obtener_consent_id()
+    if not id:
+        return None
+
+    consent = flask.session.get('consent_{}'.format(id), None)
+    if consent:
+        return consent
+
+    tk = obtener_token()
+    r = verificar_consent(tk, id)
+    if not r.ok:
+        return None
+
+    consent = r.json()
+    flask.session['consent_{}'.format(id)] = consent
     return consent
 
 
@@ -133,7 +159,7 @@ def login():
         descripcion = request.args.get('error_description', '', str)
         return render_template('error.html', error=error, descripcion=descripcion)
 
-    consent_id = obtener_consent()
+    consent_id = obtener_consent_id()
     if not consent_id:
         return make_response('unauthorized', 401)
 
@@ -148,29 +174,13 @@ def do_login():
     #return render_template('login_ok.html', usuario=usuario)
     return redirect(url_for('authorize'), 303)
 
-def hydra_obtener_consent(tk, id):
-    r = verificar_consent(tk, id)
-    if r.status_code == 200:
-        return r.json()
-    return None
+
 
 @app.route('/authorize', methods=['GET'])
 def authorize():
-    consent_id = obtener_consent()
-    if not consent_id:
-        return make_response('unauthorized', 401)
-
-    tk = obtener_token()
-    r = verificar_consent(tk, consent_id)
-    if not r.ok:
-        logging.debug(r)
-        logging.debug(r.text)
-        logging.debug(r.status_code)
-        logging.debug(r.headers.items())
+    consent = obtener_consent()
+    if not consent:
         return make_response('No autorizado', 401)
-    consent = r.json()
-    logging.debug('Consent recibido desde hydra :')
-    logging.debug(consent)
     '''
         debo analizar el conset y verificarlo o rechazarlo.
         ej:
@@ -182,22 +192,26 @@ def authorize():
             "redirectUrl": "https://192.168.0.3:9000/oauth2/auth?client_id=consumer-test&response_type=code&redirect_uri=http%3A%2F%2F127.0.0.1%3A81%2Foauth2&scope=openid+offline+hydra.clients&state=algodealgo&consent=8dc077f1-4bd2-4f51-94f7-483e2a51aac8"
         }
     '''
+    return render_template('authorize.html', scopes=consent['requestedScopes'])
 
-    tk = obtener_token()
-    r = aceptar_consent(tk, consent)
-    if not r.ok:
-        return (r.text, r.status_code, r.headers.items())
-    return redirect(consent['redirectUrl'])
-
-    #getOAuth2ConsentRequest
-    #return render_template('authorize.html')
 
 @app.route('/authorize', methods=['POST'])
 def do_authorize():
-    consent_id = obtener_consent()
-    if not consent_id:
-        return make_response('unauthorized', 401)
-    return render_template('authorize.html')
+    consent = obtener_consent()
+    if not consent:
+        return make_response('No autorizado', 401)
+
+    tk = obtener_token()
+    r = None
+    autorizado = request.form.get('auth', 'false', str)
+    if 'false' in autorizado:
+        r = denegar_consent(tk, consent)
+    else:
+        r = aceptar_consent(tk, consent)
+
+    if not r or not r.ok:
+        return (r.text, r.status_code, r.headers.items())
+    return redirect(consent['redirectUrl'])
 
 
 @app.route('/logout')
