@@ -105,6 +105,12 @@ def hydra_obtener_consent(id):
 
 @app.route('/login', methods=['GET'])
 def login():
+    ''' para los casos cuando hydra reporta un error '''
+    error = request.args.get('error', None, str)
+    if error:
+        descripcion = request.args.get('error_description', '', str)
+        return render_template('error.html', error=error, descripcion=descripcion)
+
     consent_id = obtener_consent()
     if not consent_id:
         return make_response('unauthorized', 401)

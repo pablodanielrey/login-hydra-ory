@@ -1,0 +1,12 @@
+importante info de seguridad sobre implementación de oauth.
+
+https://oauth.net/articles/authentication/
+https://tools.ietf.org/html/rfc6749 - oauth2
+https://tools.ietf.org/html/rfc6750 - bearer token
+
+si el cliente es "confidencial"
+client authentication - application/x-www-form-urlencoded usando BasicAuth
+ej:
+Authorization: Basic czZCaGRSa3F0Mzo3RmpmcDBaQnIxS3REUmJuZlZkbUl3
+
+los parámetros DEBEN ser transmitidos en el body y no pueden ir en la uri
