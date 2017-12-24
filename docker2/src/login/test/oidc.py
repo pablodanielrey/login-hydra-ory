@@ -1,6 +1,8 @@
 import os
 import requests
 from requests.auth import HTTPBasicAuth
+import urllib
+from urllib import parse
 
 class OIDC:
 
@@ -11,9 +13,10 @@ class OIDC:
         params = {
             'client_id': client_id,
             'response_type': 'code',
-            'redirect_uri': redirect_uri,
+            #'redirect_uri': redirect_uri,
             'scope': ' '.join(scopes),
             'state': 'algodealgo'
         }
-        r = requests.get(url, verify=False, allow_redirects=False, params=params)
-        return r
+        #r = requests.get(url, verify=False, allow_redirects=False, params=params)
+        #return r
+        return url + "?" + urllib.parse.urlencode(params)

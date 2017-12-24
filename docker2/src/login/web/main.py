@@ -59,7 +59,7 @@ def verificar_consent(token, consent_id):
         'Content-Type': 'application/json',
         'Accept': 'application/json'
     }
-    r = requests.get(url, verify=False, headers=headers)
+    r = requests.get(url, verify=False, headers=headers, allow_redirects=False)
     return r
 
 
@@ -74,9 +74,12 @@ def aceptar_consent(token, consent, usuario={'id':'','name':'','nickname':'','em
     data = {
         'subject': 'sdfdsfsdfsdlkfs',
         'grantScopes': consent['requestedScopes'],
-        'accessTokenExtra':  {}
+        #'accessTokenExtra':  {}
+        'authTime': 0
+        #'idTokenExtra': { 'prop1': 'algo' },
+        #'providedAcr': 'algo',
     }
-    r = requests.patch(url, verify=False, headers=headers, json=data)
+    r = requests.patch(url, verify=False, allow_redirects=False, headers=headers, json=data)
     return r
 
 def denegar_consent(token, consent_id):
@@ -86,7 +89,7 @@ def denegar_consent(token, consent_id):
         'Content-Type': 'application/json',
         'Accept': 'application/json'
     }
-    r = requests.get(url, verify=False, headers=headers)
+    r = requests.get(url, verify=False, allow_redirects=False, headers=headers)
     return r
 
 
@@ -116,15 +119,10 @@ flask_session.Session(app)
 
 
 def obtener_consent():
-    consent = flask.session.get('consent', None)
+    consent = request.args.get('consent', None, str)
     if not consent:
-        consent = request.args.get('consent', None, str)
+        consent = flask.session.get('consent', None)
     return consent
-
-
-
-
-
 
 
 @app.route('/login', methods=['GET'])
@@ -138,6 +136,7 @@ def login():
     consent_id = obtener_consent()
     if not consent_id:
         return make_response('unauthorized', 401)
+
     flask.session['consent'] = consent_id
     return render_template('login.html')
 
@@ -148,7 +147,6 @@ def do_login():
     #aca se debe chequear los datos de login y sino tirar error.
     #return render_template('login_ok.html', usuario=usuario)
     return redirect(url_for('authorize'), 303)
-
 
 def hydra_obtener_consent(tk, id):
     r = verificar_consent(tk, id)
@@ -163,10 +161,16 @@ def authorize():
         return make_response('unauthorized', 401)
 
     tk = obtener_token()
-    consent = hydra_obtener_consent(tk, consent_id)
-    if not consent:
+    r = verificar_consent(tk, consent_id)
+    if not r.ok:
+        logging.debug(r)
+        logging.debug(r.text)
+        logging.debug(r.status_code)
+        logging.debug(r.headers.items())
         return make_response('No autorizado', 401)
-
+    consent = r.json()
+    logging.debug('Consent recibido desde hydra :')
+    logging.debug(consent)
     '''
         debo analizar el conset y verificarlo o rechazarlo.
         ej:
@@ -181,14 +185,9 @@ def authorize():
 
     tk = obtener_token()
     r = aceptar_consent(tk, consent)
-    logging.debug(r)
     if not r.ok:
-        resp = make_response(r.text,r.status_code)
-        for h in r.headers:
-            resp.headers[h] = r.headers[h]
-            return resp
-
-    return redirect(consent['redirectUrl'], 303)
+        return (r.text, r.status_code, r.headers.items())
+    return redirect(consent['redirectUrl'])
 
     #getOAuth2ConsentRequest
     #return render_template('authorize.html')

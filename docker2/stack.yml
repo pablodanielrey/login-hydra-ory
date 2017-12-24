@@ -34,6 +34,7 @@ services:
       ISSUER: https://192.168.0.3:9000/
       CONSENT_URL: http://192.168.0.3/login
       FORCE_ROOT_CLIENT_CREDENTIALS: admin:demo-password
+      LOG_LEVEL: debug
     networks:
       - webnet
 

@@ -18,9 +18,10 @@ app.config['SESSION_COOKIE_NAME'] = 'users_session'
 @app.route('/oauth2', methods=['GET'])
 def callback():
     error = request.args.get('error', None, str)
+    logging.debug('--callback--')
     if error:
         desc = request.args.get('error_description', '', str)
-        return make_response(error + '<br>' + desc,500)
+        return make_response(error + '<br>' + desc, 403)
     return make_response('ok', 200)
 
 @app.route('/', methods=['GET'], defaults={'path':None})
@@ -30,17 +31,11 @@ def send(path):
 
     oidc = OIDC()
     r = oidc.auth_token('consumer-test', 'http://127.0.0.1:81' + url_for('callback'), ['openid','offline','hydra.clients'])
-    resp = make_response(r.text, r.status_code)
-    for h in r.headers:
-        logging.debug(h)
-        logging.debug(r.headers[h])
-        resp.headers[h] = r.headers[h]
-    logging.debug(resp)
-    return resp
 
-    #if not path:
-    #    return redirect('/perfil/index.html'), 303
-    #return send_from_directory(app.static_url_path, path)
+    return redirect(r,302)
+    """
+    return (r.text, r.status_code, r.headers.items())
+    """
 
 @app.after_request
 def add_header(r):
