@@ -69,6 +69,21 @@ def get_resource():
     return (r.text, r.status_code, r.headers.items())
 
 
+@app.route('/userinfo', methods=['GET'])
+@jsonapi
+def get_userinfo():
+    r = None
+    token = request.args.get('token',None,str)
+    if not token:
+        token = flask.session.get('token',None)
+
+    userinfo = oidc.userinfo(token)
+    if not userinfo:
+        return {}
+    return userinfo
+
+
+
 @app.after_request
 def add_header(r):
     """

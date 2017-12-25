@@ -6,7 +6,6 @@ import redis
 import flask
 from flask import Flask, request, send_from_directory, jsonify, redirect, url_for, make_response
 from flask_jsontools import jsonapi
-import flask_session
 
 import requests
 
@@ -20,16 +19,14 @@ app.config['SESSION_COOKIE_NAME'] = 'users_session'
 
 rs = ResourceServer('consumer-test','consumer-secret', 'resource server test')
 
+import json
+
 @app.route('/api/r1', methods=['GET'])
+@rs.require_valid_token
 @jsonapi
-def r1():
-    token = rs.bearer_token(request.headers)
-    if not token:
-        return rs.invalid_token()
-    tk = rs.introspect_token(token)
-    logging.debug(tk)
-    if not tk or not tk['active']:
-        return rs.invalid_request()
+def r1(token=None):
+    logging.debug('recibi este token')
+    logging.debug(json.dumps(token))
     return {'recurso':'aca taaaaa'}
 
 

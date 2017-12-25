@@ -76,9 +76,12 @@ def aceptar_consent(token, consent, usuario={'id':'','name':'','nickname':'','em
         'grantScopes': consent['requestedScopes'],
         #'accessTokenExtra':  {}
         'authTime': 0
-        #'idTokenExtra': { 'prop1': 'algo' },
         #'providedAcr': 'algo',
     }
+
+    ''' deberia chequear que scopes requirio y agregar los datos '''
+    data['idTokenExtra'] = { 'name': 'pepe', 'nickname':'prueba de nickname', 'email':'algo@econo.unlp', 'email_verified':True }
+
     r = requests.patch(url, verify=False, allow_redirects=False, headers=headers, json=data)
     return r
 

@@ -7,6 +7,7 @@ from urllib import parse
 
 class OIDC:
 
+    userinfo_url = os.environ['HYDRA_HOST'] + '/userinfo'
     auth_url = os.environ['HYDRA_HOST'] + '/oauth2/auth'
     token_url = os.environ['HYDRA_HOST'] + '/oauth2/token'
 
@@ -55,6 +56,7 @@ class OIDC:
             return None
 
         token = r.json()
+        logging.debug(token)
         token['access_token']
         token['expires_in']
         token['id_token']
@@ -62,6 +64,20 @@ class OIDC:
         token['scope']
         token['token_type']
         return token
+
+    def userinfo(self, token):
+        headers = {
+            'Authorization': 'Bearer {}'.format(token)
+        }
+        r = requests.post(self.userinfo_url, verify=self.verify, allow_redirects=False, headers=headers)
+        if not r.ok:
+            return None
+        return r.json()
+
+
+
+from functools import wraps
+import flask
 
 class ResourceServer:
 
@@ -72,6 +88,27 @@ class ResourceServer:
         self.verify = verify
         self.client_id = client_id
         self.client_secret = client_secret
+
+    def require_valid_token(self, f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+
+            ''' chequeo el token por introspeccion '''
+            token = self.bearer_token(flask.request.headers)
+            if not token:
+                return self.invalid_token()
+            tk = self.introspect_token(token)
+            logging.debug(tk)
+            if not tk or not tk['active']:
+                return self.invalid_request()
+
+            ''' agrego el token a los argumentos '''
+            kwargs['token'] = tk
+
+            return f(*args, **kwargs)
+
+        return decorated_function
+
 
     def bearer_token(self, headers):
         if 'Authorization' in headers:
