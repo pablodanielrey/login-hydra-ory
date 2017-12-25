@@ -11,21 +11,23 @@ class OIDC:
     auth_url = os.environ['HYDRA_HOST'] + '/oauth2/auth'
     token_url = os.environ['HYDRA_HOST'] + '/oauth2/token'
 
-    def __init__(self, client_id, client_secret, verify=False):
+    def __init__(self, client_id, client_secret, redirect_uri, verify=False):
         #self.session = session
         self.verify = verify
         self.client_id = client_id
         self.client_secret = client_secret
+        self.redirec_uri = redirect_uri
 
-    def auth_token(self, state, scopes=[]):
+    def auth_token(self, state, nonce, scopes=[]):
         #application/x-www-form-urlencoded
         #auth = HTTPBasicAuth(client_id, client_secret)
         params = {
             'client_id': self.client_id,
             'response_type': 'code',
-            #'redirect_uri': redirect_uri,
+            'redirect_uri': self.redirect_uri,
             'scope': ' '.join(scopes),
-            'state': state
+            'state': state,
+            'nonce': nonce
         }
         #r = requests.get(url, verify=False, allow_redirects=False, params=params)
         #return r
@@ -38,7 +40,7 @@ class OIDC:
             'client_id': self.client_id,
             'grant_type': 'authorization_code',
             'code': code,
-            #'redirect_uri': redirect_uri
+            'redirect_uri': self.redirect_uri
         }
         r = requests.post(self.token_url, verify=self.verify, allow_redirects=False, auth=auth, data=data)
         return r

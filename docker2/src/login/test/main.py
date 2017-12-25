@@ -8,6 +8,7 @@ from flask import Flask, request, send_from_directory, jsonify, redirect, url_fo
 from flask_jsontools import jsonapi
 import flask_session
 
+import uuid
 import json
 import requests
 
@@ -34,9 +35,7 @@ def callback():
     if error:
         desc = request.args.get('error_description', '', str)
         return make_response(error + '<br>' + desc, 401)
-    state_r = request.args.get('state', None, str)
-    if 'algo123456' != state_r:
-        return make_response('estados no coincidentes', 401)
+
     token = oidc.callback(request.args)
     if not token:
         return make_response('error', 401)
@@ -47,7 +46,7 @@ def callback():
 
 @app.route('/', methods=['GET'])
 def send():
-    r = oidc.auth_token(state='algo123456', scopes=['openid','offline','hydra.clients'])
+    r = oidc.auth_token(state=str(uuid.uuid4()), nonce=str(uuid.uuid4()), scopes=['openid', 'profile', 'email', 'address', 'phone', 'offline','hydra.clients'])
     return redirect(r,302)
 
 

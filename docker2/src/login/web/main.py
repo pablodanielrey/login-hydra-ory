@@ -64,7 +64,7 @@ def verificar_consent(token, consent_id):
 
 
 
-def aceptar_consent(token, consent, usuario={'id':'','name':'','nickname':'','email':'','email_verified':''}):
+def aceptar_consent(token, consent, usuario={'id':'sdfdsfs', 'name':'', 'email':'','email_verified':''}):
     url = HYDRA_HOST + '/oauth2/consent/requests/' + consent['id'] + '/accept'
     headers = {
         'Authorization': 'bearer {}'.format(token),
@@ -72,7 +72,7 @@ def aceptar_consent(token, consent, usuario={'id':'','name':'','nickname':'','em
         'Accept': 'application/json'
     }
     data = {
-        'subject': 'sdfdsfsdfsdlkfs',
+        'subject': usuario['id'],
         'grantScopes': consent['requestedScopes'],
         #'accessTokenExtra':  {}
         'authTime': 0
@@ -80,7 +80,30 @@ def aceptar_consent(token, consent, usuario={'id':'','name':'','nickname':'','em
     }
 
     ''' deberia chequear que scopes requirio y agregar los datos '''
-    data['idTokenExtra'] = { 'name': 'pepe', 'nickname':'prueba de nickname', 'email':'algo@econo.unlp', 'email_verified':True }
+    data['idTokenExtra'] = {
+        'preferred_username': 'usuario@algo',
+        'name': usuario['name'],
+        'given_name': usuario['name'],
+        'family_name': usuario['name'],
+        'nickname': usuario['name'],
+        'picture': 'http://gravatar.com/imagen.jpg',
+        'gender': 'male',
+        'address': {
+            'formatted': 'calle 3 número 1232 depto 5, La Plata, Buenos Aires, Argentina',
+            'street_address': 'calle 3 número 1232 depto 5',
+            'locality': 'La Plata',
+            'region': 'Buenos Aires',
+            'postal_code': '1900',
+            'country': 'Argentina'
+        },
+        'birthdate': '1979-02-12',
+        'locale': 'es-AR',
+        'phone_number': '+1 (604) 555-1234;ext=5678',
+        'phone_number_verified': False,
+        'email':'algo@econo.unlp',
+        'email_verified':True,
+        'updated_at': 0
+    }
 
     r = requests.patch(url, verify=False, allow_redirects=False, headers=headers, json=data)
     return r
@@ -187,6 +210,7 @@ def authorize():
     consent = obtener_consent()
     if not consent:
         return make_response('No autorizado', 401)
+
     '''
         debo analizar el conset y verificarlo o rechazarlo.
         ej:
