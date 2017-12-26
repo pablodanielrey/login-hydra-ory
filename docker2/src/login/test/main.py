@@ -27,7 +27,7 @@ app.config['SESSION_REDIS'] = r
 flask_session.Session(app)
 
 
-oidc = OIDC('consumer-test', 'consumer-secret')
+oidc = OIDC('consumer-test', 'consumer-secret', 'http://consumer-test.localhost:81/oauth2')
 
 @app.route('/oauth2', methods=['GET'])
 def callback():

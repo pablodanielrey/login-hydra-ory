@@ -16,7 +16,7 @@ class OIDC:
         self.verify = verify
         self.client_id = client_id
         self.client_secret = client_secret
-        self.redirec_uri = redirect_uri
+        self.redirect_uri = redirect_uri
 
     def auth_token(self, state, nonce, scopes=[]):
         #application/x-www-form-urlencoded

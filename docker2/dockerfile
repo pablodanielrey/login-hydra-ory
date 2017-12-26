@@ -19,6 +19,11 @@ COPY supervisor/sflask.conf /etc/supervisor/conf.d
 ADD src.tar.gz /
 RUN cd /src && pip3 install --trusted-host pypi.econo.unlp.edu.ar --upgrade -e .
 
+EXPOSE 5000
+EXPOSE 5001
+EXPOSE 5002
+EXPOSE 5003
+
 WORKDIR /src
 
 ENTRYPOINT ["/entrypoint.sh"]

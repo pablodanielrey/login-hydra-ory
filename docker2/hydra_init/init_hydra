@@ -1,10 +1,13 @@
-#!/bin/bash
-
-#seguir este tutorial.
-#https://www.ory.am/run-oauth2-server-open-source-api-security
-
+----
+hay que ejecutar un contenedor con hydra para conectarse al postgres inicialmente y ejecutar la migración de la base.
 # y se ejecuta a mano ahi adentro la migración de la base
 hydra migrate sql $DATABASE_URL
+---
+
+una vez realizada la migración debería levantar el contenedor de hydra del stack.yml
+con eso nos podemos conectar a ese contenedor y ejecutar los siguientes scripts para poder definir los clientes inciiales
+el consent-app y las policies de cada uno de ellos
+
 
 hydra clients create --skip-tls-verify \
     --id consent-app \
@@ -29,7 +32,7 @@ hydra clients create --skip-tls-verify \
     --grant-types authorization_code,refresh_token,client_credentials,implicit \
     --response-types token,code,id_token \
     --allowed-scopes openid,offline,hydra.clients \
-    --callbacks http://163.10.56.57:81/oauth2
+    --callbacks http://consumer-test.localhost:81/oauth2
 
 hydra policies create --skip-tls-verify \
     --actions get \
