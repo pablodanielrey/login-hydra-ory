@@ -29,7 +29,7 @@ hydra clients create --skip-tls-verify \
     --grant-types authorization_code,refresh_token,client_credentials,implicit \
     --response-types token,code,id_token \
     --allowed-scopes openid,offline,hydra.clients \
-    --callbacks http://127.0.0.1:81/oauth2
+    --callbacks http://163.10.56.57:81/oauth2
 
 hydra policies create --skip-tls-verify \
     --actions get \
