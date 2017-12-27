@@ -31,8 +31,8 @@ services:
     environment:
       SYSTEM_SECRET: y82XL-wAPCCZu+B4
       DATABASE_URL: postgres://hydra:hydra@db:5432/hydra?sslmode=disable
-      ISSUER: https://192.168.0.3:9000/
-      CONSENT_URL: http://192.168.0.3/login
+      ISSUER: https://hydra.localhost:9000/
+      CONSENT_URL: http://consent-app.localhost:3333/login
       FORCE_ROOT_CLIENT_CREDENTIALS: admin:demo-password
       LOG_LEVEL: debug
     networks:
@@ -51,12 +51,12 @@ services:
   consent-app:
     image: login-consent-hydra
     ports:
-      - 80:5000
+      - 3333:5000
     volumes:
       - "/home/pablo/github/econo2/login-hydra-ory/docker2/src/login:/src/login"
     environment:
       REDIS_HOST: redis
-      HYDRA_HOST: https://192.168.0.3:9000
+      HYDRA_HOST: https://hydra.localhost:9000
       HYDRA_CLIENT_ID: consent-app
       HYDRA_CLIENT_SECRET: consent-secret
     networks:
@@ -71,7 +71,7 @@ services:
       - "/home/pablo/github/econo2/login-hydra-ory/docker2/src/login:/src/login"
     environment:
       REDIS_HOST: redis
-      HYDRA_HOST: https://192.168.0.3:9000
+      HYDRA_HOST: https://hydra.localhost:9000
       HYDRA_CLIENT_ID: consent-app
       HYDRA_CLIENT_SECRET: consent-secret
     networks:
