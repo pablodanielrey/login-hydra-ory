@@ -26,8 +26,8 @@ app.config['SESSION_TYPE'] = 'redis'
 app.config['SESSION_REDIS'] = r
 flask_session.Session(app)
 
+oidc = OIDC(client_id='consumer-test', client_secret='consumer-secret', redirect_uri='http://127.0.0.1:81/oauth2')
 
-oidc = OIDC('consumer-test', 'consumer-secret')
 
 @app.route('/oauth2', methods=['GET'])
 def callback():
@@ -46,7 +46,7 @@ def callback():
 
 @app.route('/', methods=['GET'])
 def send():
-    r = oidc.auth_token(state=str(uuid.uuid4()), nonce=str(uuid.uuid4()), scopes=['openid', 'profile', 'email', 'address', 'phone', 'offline','hydra.clients'])
+    r = oidc.auth_code(state=str(uuid.uuid4()), nonce=str(uuid.uuid4()), scopes=['openid', 'profile', 'email', 'address', 'phone', 'offline','hydra.clients'])
     return redirect(r,302)
 
 

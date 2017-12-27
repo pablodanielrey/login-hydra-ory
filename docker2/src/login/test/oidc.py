@@ -5,29 +5,54 @@ from requests.auth import HTTPBasicAuth
 import urllib
 from urllib import parse
 
+
+
 class OIDC:
 
     userinfo_url = os.environ['HYDRA_HOST'] + '/userinfo'
     auth_url = os.environ['HYDRA_HOST'] + '/oauth2/auth'
     token_url = os.environ['HYDRA_HOST'] + '/oauth2/token'
 
+    default_scopes = ['openid', 'profile', 'email', 'address', 'phone', 'offline']
+    default_claims = {
+        'userinfo': {
+            "given_name": {"essential": True},
+            "nickname": None,
+            "email": {"essential": True},
+            "email_verified": {"essential": True},
+            "picture": None
+        },
+        "id_token": {
+            "gender": None,
+            "birthdate": {"essential": True}
+        }
+    }
+
     def __init__(self, client_id, client_secret, redirect_uri, verify=False):
         #self.session = session
         self.verify = verify
         self.client_id = client_id
         self.client_secret = client_secret
-        self.redirec_uri = redirect_uri
+        self.redirect_uri = redirect_uri
 
-    def auth_token(self, state, nonce, scopes=[]):
+    def auth_code(self, state, nonce, scopes=None, claims=None):
         #application/x-www-form-urlencoded
         #auth = HTTPBasicAuth(client_id, client_secret)
+
+        if not scopes:
+            scopes = self.default_scopes
+
+        if not claims:
+            claims = self.default_claims
+
         params = {
             'client_id': self.client_id,
             'response_type': 'code',
             'redirect_uri': self.redirect_uri,
             'scope': ' '.join(scopes),
             'state': state,
-            'nonce': nonce
+            'nonce': nonce,
+            'claims': claims
         }
         #r = requests.get(url, verify=False, allow_redirects=False, params=params)
         #return r
@@ -69,7 +94,9 @@ class OIDC:
 
     def userinfo(self, token):
         headers = {
-            'Authorization': 'Bearer {}'.format(token)
+            'Authorization': 'Bearer {}'.format(token),
+            'Accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded'
         }
         r = requests.post(self.userinfo_url, verify=self.verify, allow_redirects=False, headers=headers)
         if not r.ok:
