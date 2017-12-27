@@ -55,7 +55,7 @@ services:
       SYSTEM_SECRET: y82XL-wAPCCZu+B4
       DATABASE_URL: postgres://hydra:hydra@db:5432/hydra?sslmode=disable
       ISSUER: https://hydra.dominio:9000
-      CONSENT_URL: http://consent.dominio/login
+      CONSENT_URL: https://consent.dominio/login
       FORCE_ROOT_CLIENT_CREDENTIALS: admin:demo-password
       LOG_LEVEL: debug
     dns:

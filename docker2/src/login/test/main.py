@@ -61,9 +61,9 @@ def get_resource():
         headers = {
             'Authorization': 'Bearer {}'.format(token)
         }
-        r = requests.get('http://127.0.0.1:5001/api/r1', headers=headers)
+        r = requests.get('https://client.dominio/api/r1', verify=False, headers=headers)
     else:
-        r = requests.get('http://127.0.0.1:5001/api/r1')
+        r = requests.get('https://client.dominio/api/r1', verify=False)
     return (r.text, r.status_code, r.headers.items())
 
 
