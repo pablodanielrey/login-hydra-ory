@@ -1,0 +1,5 @@
+
+zone "dominio" {
+	type master;
+	file "/etc/bind/zones/db.local";
+};

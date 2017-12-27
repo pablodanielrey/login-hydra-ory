@@ -1,6 +1,20 @@
 version: "3.4"
 services:
 
+  dns:
+    image: fike/bind9
+    ports:
+      - "53:53/udp"
+      - "53:53/tcp"
+    volumes:
+      - "/home/pablo/github/econo2/login-hydra-ory/docker2/bind/zones:/etc/bind/zones"
+      - "/home/pablo/github/econo2/login-hydra-ory/docker2/bind/named.conf.local:/etc/bind/named.conf.local"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+    networks:
+      - webnet
+
   lb:
     image: nginx
     ports:
@@ -11,6 +25,8 @@ services:
     deploy:
       placement:
         constraints: [node.role == manager]
+    dns:
+      - 192.168.0.3
     networks:
       - webnet
 
@@ -41,6 +57,8 @@ services:
       CONSENT_URL: http://consent.dominio/login
       FORCE_ROOT_CLIENT_CREDENTIALS: admin:demo-password
       LOG_LEVEL: debug
+    dns:
+      - 192.168.0.3
     networks:
       - webnet
 
@@ -55,6 +73,8 @@ services:
       HYDRA_HOST: https://hydra.dominio:9000
       HYDRA_CLIENT_ID: consent-app
       HYDRA_CLIENT_SECRET: consent-secret
+    dns:
+      - 192.168.0.3
     networks:
       - webnet
 
@@ -70,6 +90,8 @@ services:
       HYDRA_HOST: https://hydra.dominio:9000
       HYDRA_CLIENT_ID: consent-app
       HYDRA_CLIENT_SECRET: consent-secret
+    dns:
+      - 192.168.0.3
     networks:
       - webnet
 
