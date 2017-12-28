@@ -182,7 +182,6 @@ def get_style():
     return send_from_directory(directory='style', filename='login.css')
 
 
-
 @app.route('/login', methods=['GET'])
 def login():
     ''' para los casos cuando hydra reporta un error '''

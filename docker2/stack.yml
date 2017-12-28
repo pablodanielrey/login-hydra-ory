@@ -96,6 +96,33 @@ services:
     networks:
       - webnet
 
+  users:
+    image: users
+    ports:
+      - 5005:5000
+      - 5006:5001
+      - 5007:5002
+      - 5008:5003
+    volumes:
+      - "/src/github/users/docker/src/users:/src/users"
+    environment:
+      REDIS_HOST: redis
+      USERS_DB_USER: ${USERS_DB_USER}
+      USERS_DB_PASSWORD: ${USERS_DB_PASSWORD}
+      USERS_DB_HOST: ${USERS_DB_HOST}
+      USERS_DB_NAME: ${USERS_DB_NAME}
+      JWT_CLAVE1: lkdklfsdflksdfg4g4g4ergreg
+      JWT_CLAVE2: 23r32rmo3mffsfdsfggerereger
+      JWT_CLAVE3: 3i32f3f3fm3fm32ifm3oifm3
+      JWT_CLAVE4: 23kl32klfm3kfmklmfk32lf
+      USERS_URL: https://usuarios.dominio
+      USERS_API_URL: https://usuarios.dominio/users/api/v1.0
+      LOGIN_OIDC_URL: https://login.dominio
+      USERS_API_URL: https://usuarios.dominio/users/api/v1.0
+      FILES_API_URL: https://archivos.econo.unlp.edu.ar/files/api/v1.0
+      EMAILS_API_URL: https://emails.econo.unlp.edu.ar/emails/api/v1.0
+      GOOGLE_API_URL: https://google.econo.unlp.edu.ar/google/api/v1.0
+
   redis:
     image: redis
     deploy:
