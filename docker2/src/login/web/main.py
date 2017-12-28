@@ -187,7 +187,7 @@ def login():
 
     consent_id = obtener_consent_id()
     if not consent_id:
-        return make_response('unauthorized', 401)
+        return render_template('login.html')
     flask.session['consent'] = consent_id
 
     usuario_id = flask.session.get('usuario_id',None)
