@@ -27,7 +27,7 @@ app.config['SESSION_REDIS'] = r
 flask_session.Session(app)
 
 oidc = OIDC(client_id='consumer-test', client_secret='consumer-secret', redirect_uri='https://client.dominio/oauth2')
-app.add_url_rule('/oauth2', 'callback', oidc.callback)
+oidc.register_in_flask(app, '/oauth2')
 
 """
 def callback():

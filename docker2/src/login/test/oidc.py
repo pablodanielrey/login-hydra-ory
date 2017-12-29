@@ -166,6 +166,9 @@ class OIDC:
         return r.json()
 
 
+    def register_in_flask(self, app, redirect='/oauth2'):
+        app.add_url_rule(redirect, 'oidc_callback', self.callback)
+
     def callback(self):
         data = flask.session.get(self.oidc_session, None)
         if not data:
