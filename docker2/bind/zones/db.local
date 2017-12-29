@@ -16,3 +16,4 @@ $TTL	604800
 hydra   A   192.168.0.3
 consent A   192.168.0.3
 client  A   192.168.0.3
+usuarios	A	192.168.0.3
