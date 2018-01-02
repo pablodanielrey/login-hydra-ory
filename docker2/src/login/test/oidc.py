@@ -1,3 +1,14 @@
+"""
+    Implementa oauth y OpenIDConnect
+    el flujo normal para una aplicación cliente web es:
+    1 - register_in_flask
+    2 - petición al sitio --> @require_login --> auth_code --> callback --> access_token --> petición original
+
+    el flujo normal para una app que exporta una api
+    1 - usa solamente ResourceServer
+    2 - petición al sitio --> @require_valid_token --> instrospect_token --> peticion original
+"""
+
 import os
 import logging
 import requests
@@ -26,19 +37,16 @@ class ResourceServer:
     def require_valid_token(self, f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-
-            ''' chequeo el token por introspeccion '''
+            """
+                Recupera y chequea el token por validez
+            """
             token = self.bearer_token(flask.request.headers)
             if not token:
                 return self.invalid_token()
-            tk = self.introspect_token(token)
-            logging.debug(tk)
-            if not tk or not tk['active']:
+            tk = self.verify_token(token)
+            if not tk:
                 return self.invalid_request()
-
-            ''' agrego el token a los argumentos '''
             kwargs['token'] = tk
-
             return f(*args, **kwargs)
 
         return decorated_function
@@ -65,6 +73,13 @@ class ResourceServer:
         if not r.ok:
             return None
         return r.json()
+
+    def verify_token(self, token, scopes=[]):
+        tk = self.introspect_token(token)
+        logging.debug(tk)
+        if not tk or not tk['active']:
+            return None
+        return tk
 
 
     def invalid_request(self):
@@ -170,6 +185,10 @@ class OIDC:
         app.add_url_rule(redirect, 'oidc_callback', self.callback)
 
     def callback(self):
+        """
+            Callback asociado al flujo de autentificación oauth.
+            Obtiene y setea el token dentro de la sesión
+        """
         data = flask.session.get(self.oidc_session, None)
         if not data:
             return ('Bad Request', 400)
@@ -207,15 +226,20 @@ class OIDC:
         token['token_type']
         """
 
-
     def require_login(self, f):
+        """
+            Verifica que exista un token asociado a la sesión en el servidor para el cliente.
+            No verifica la validez del token
+            El token es seteado en la sesión en el método callback
+        """
         @wraps(f)
         def decorated_function(*args, **kwargs):
             data = flask.session.get(self.oidc_session, None)
             if data:
                 #data = json.loads(data)
                 if 'token' in data:
-                    kwargs['token'] = data['token']
+                    token = data['token']
+                    kwargs['token'] = token
                     return f(*args, **kwargs)
 
             if not data:

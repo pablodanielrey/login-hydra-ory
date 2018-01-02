@@ -29,22 +29,6 @@ flask_session.Session(app)
 oidc = OIDC(client_id='consumer-test', client_secret='consumer-secret', redirect_uri='https://client.dominio/oauth2')
 oidc.register_in_flask(app, '/oauth2')
 
-"""
-def callback():
-    error = request.args.get('error', None, str)
-    if error:
-        desc = request.args.get('error_description', '', str)
-        return make_response(error + '<br>' + desc, 401)
-
-    token = oidc.callback(request.args)
-    if not token:
-        return make_response('error', 401)
-
-    flask.session['token'] = token
-
-    return make_response(json.dumps(token), 200)
-"""
-
 
 @app.route('/', methods=['GET'])
 @oidc.require_login
