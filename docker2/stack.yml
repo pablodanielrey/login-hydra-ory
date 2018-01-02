@@ -74,6 +74,7 @@ services:
       HYDRA_HOST: https://hydra.dominio:9000
       HYDRA_CLIENT_ID: consent-app
       HYDRA_CLIENT_SECRET: consent-secret
+      USERS_API_URL: https://usuarios.dominio/users/api/v1.0
     dns:
       - 163.10.56.57
     networks:
