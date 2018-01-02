@@ -27,7 +27,7 @@ services:
       placement:
         constraints: [node.role == manager]
     dns:
-      - 163.10.56.57
+      - 163.10.56.24
     networks:
       - webnet
 
@@ -59,7 +59,7 @@ services:
       FORCE_ROOT_CLIENT_CREDENTIALS: admin:demo-password
       LOG_LEVEL: debug
     dns:
-      - 163.10.56.57
+      - 163.10.56.24
     networks:
       - webnet
 
@@ -76,7 +76,7 @@ services:
       HYDRA_CLIENT_SECRET: consent-secret
       USERS_API_URL: https://usuarios.dominio/users/api/v1.0
     dns:
-      - 163.10.56.57
+      - 163.10.56.24
     networks:
       - webnet
 
@@ -93,11 +93,11 @@ services:
       HYDRA_CLIENT_ID: consent-app
       HYDRA_CLIENT_SECRET: consent-secret
     dns:
-      - 163.10.56.57
+      - 163.10.56.24
     networks:
       - webnet
 
-  users:
+  users-service:
     image: users
     ports:
       - 5005:5000
@@ -123,6 +123,10 @@ services:
       FILES_API_URL: https://archivos.econo.unlp.edu.ar/files/api/v1.0
       EMAILS_API_URL: https://emails.econo.unlp.edu.ar/emails/api/v1.0
       GOOGLE_API_URL: https://google.econo.unlp.edu.ar/google/api/v1.0
+    dns:
+      - 163.10.56.24
+    networks:
+      - webnet
 
   redis:
     image: redis
