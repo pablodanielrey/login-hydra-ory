@@ -19,6 +19,23 @@ COPY supervisor/sflask.conf /etc/supervisor/conf.d
 ADD src.tar.gz /
 RUN cd /src && pip3 install --trusted-host pypi.econo.unlp.edu.ar --upgrade -e .
 
+
+### debe haber ejecutado antes descargar-node.sh ####
+ENV ARCH x64
+
+ENV NODE_VERSION 9.2.0
+COPY node/node-v$NODE_VERSION-linux-$ARCH.tar.xz /root/
+RUN tar -xJf "/root/node-v$NODE_VERSION-linux-$ARCH.tar.xz" -C /usr/local --strip-components=1 --no-same-owner \
+  && ln -s /usr/local/bin/node /usr/local/bin/nodejs
+
+ENV YARN_VERSION 1.3.2
+COPY node/yarn-v$YARN_VERSION.tar.gz /root/
+RUN mkdir -p /opt/yarn \
+  && tar -xzf /root/yarn-v$YARN_VERSION.tar.gz -C /opt/yarn --strip-components=1 \
+  && ln -s /opt/yarn/bin/yarn /usr/local/bin/yarn \
+  && ln -s /opt/yarn/bin/yarn /usr/local/bin/yarnpkg
+  ############################################
+
 EXPOSE 5000
 EXPOSE 5001
 EXPOSE 5002

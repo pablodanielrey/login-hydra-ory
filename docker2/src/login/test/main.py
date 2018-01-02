@@ -27,8 +27,9 @@ app.config['SESSION_REDIS'] = r
 flask_session.Session(app)
 
 oidc = OIDC(client_id='consumer-test', client_secret='consumer-secret', redirect_uri='https://client.dominio/oauth2')
+oidc.register_in_flask(app, '/oauth2')
 
-@app.route('/oauth2', methods=['GET'])
+"""
 def callback():
     error = request.args.get('error', None, str)
     if error:
@@ -42,11 +43,19 @@ def callback():
     flask.session['token'] = token
 
     return make_response(json.dumps(token), 200)
+"""
+
 
 @app.route('/', methods=['GET'])
-def send():
+@oidc.require_login
+def send(token=None):
+    if not token:
+        return make_response('nada', 200)
+    return make_response(json.dumps(token), 200)
+    """
     r = oidc.auth_code(state=str(uuid.uuid4()), nonce=str(uuid.uuid4()), scopes=['openid', 'profile', 'email', 'address', 'phone', 'offline','hydra.clients'])
     return redirect(r,302)
+    """
 
 
 @app.route('/r', methods=['GET'])

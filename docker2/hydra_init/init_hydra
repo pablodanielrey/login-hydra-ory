@@ -43,6 +43,15 @@ hydra policies create --skip-tls-verify \
     --subjects "<.*>"
 
 
+## registro el cliente del sistema de usuarios.
+hydra clients create --skip-tls-verify \
+    --id users \
+    --secret users-secret \
+    --grant-types authorization_code,refresh_token,client_credentials,implicit \
+    --response-types token,code,id_token \
+    --allowed-scopes openid,profile,offline,hydra.clients,* \
+    --callbacks https://usuarios.dominio/oauth2
+
 
 
 

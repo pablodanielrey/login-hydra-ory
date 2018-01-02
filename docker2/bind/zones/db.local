@@ -16,3 +16,4 @@ $TTL	604800
 hydra   A   163.10.56.57
 consent A   163.10.56.57
 client  A   163.10.56.57
+usuarios	A	163.10.56.57

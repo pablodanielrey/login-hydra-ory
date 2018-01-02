@@ -4,109 +4,14 @@ import requests
 from requests.auth import HTTPBasicAuth
 import urllib
 from urllib import parse
+import json
 
-
-
-class OIDC:
-
-    userinfo_url = os.environ['HYDRA_HOST'] + '/userinfo'
-    auth_url = os.environ['HYDRA_HOST'] + '/oauth2/auth'
-    token_url = os.environ['HYDRA_HOST'] + '/oauth2/token'
-
-    default_scopes = ['openid', 'profile', 'email', 'address', 'phone', 'offline']
-    default_claims = {
-        'userinfo': {
-            "given_name": {"essential": True},
-            "nickname": None,
-            "email": {"essential": True},
-            "email_verified": {"essential": True},
-            "picture": None
-        },
-        "id_token": {
-            "gender": None,
-            "birthdate": {"essential": True}
-        }
-    }
-
-    def __init__(self, client_id, client_secret, redirect_uri, verify=False):
-        #self.session = session
-        self.verify = verify
-        self.client_id = client_id
-        self.client_secret = client_secret
-        self.redirect_uri = redirect_uri
-
-    def auth_code(self, state, nonce, scopes=None, claims=None):
-        #application/x-www-form-urlencoded
-        #auth = HTTPBasicAuth(client_id, client_secret)
-
-        if not scopes:
-            scopes = self.default_scopes
-
-        if not claims:
-            claims = self.default_claims
-
-        params = {
-            'client_id': self.client_id,
-            'response_type': 'code',
-            'redirect_uri': self.redirect_uri,
-            'scope': ' '.join(scopes),
-            'state': state,
-            'nonce': nonce,
-            'claims': claims
-        }
-        #r = requests.get(url, verify=False, allow_redirects=False, params=params)
-        #return r
-        return self.auth_url + "?" + urllib.parse.urlencode(params)
-
-    def access_token(self, code):
-        #application/x-www-form-urlencoded
-        auth = HTTPBasicAuth(self.client_id, self.client_secret)
-        data = {
-            'client_id': self.client_id,
-            'grant_type': 'authorization_code',
-            'code': code,
-            'redirect_uri': self.redirect_uri
-        }
-        r = requests.post(self.token_url, verify=self.verify, allow_redirects=False, auth=auth, data=data)
-        return r
-
-
-    def callback(self, params):
-        code = params.get('code', None, str)
-        state = params.get('state', None, str)
-
-        r = self.access_token(code)
-        if not r.ok:
-            logging.debug(r.text)
-            logging.debug(r.status_code)
-            logging.debug(r.headers.items())
-            return None
-
-        token = r.json()
-        logging.debug(token)
-        token['access_token']
-        token['expires_in']
-        token['id_token']
-        token['refresh_token']
-        token['scope']
-        token['token_type']
-        return token
-
-    def userinfo(self, token):
-        headers = {
-            'Authorization': 'Bearer {}'.format(token),
-            'Accept': 'application/json',
-            'Content-Type': 'application/x-www-form-urlencoded'
-        }
-        r = requests.post(self.userinfo_url, verify=self.verify, allow_redirects=False, headers=headers)
-        if not r.ok:
-            return None
-        return r.json()
-
-
-
+import uuid
 from functools import wraps
 import flask
+from flask import redirect, url_for
+
+
 
 class ResourceServer:
 
@@ -182,3 +87,143 @@ class ResourceServer:
                 'WWW-Authenticate': 'Basic realm=\"{}\"'.format(self.realm)
             }
         return (text, status, headers)
+
+
+class OIDC:
+
+    oidc_session = os.environ['OIDC_SESSION']
+    userinfo_url = os.environ['HYDRA_HOST'] + '/userinfo'
+    auth_url = os.environ['HYDRA_HOST'] + '/oauth2/auth'
+    token_url = os.environ['HYDRA_HOST'] + '/oauth2/token'
+
+    default_scopes = ['openid', 'profile', 'email', 'address', 'phone', 'offline']
+    default_claims = {
+        'userinfo': {
+            "given_name": {"essential": True},
+            "nickname": None,
+            "email": {"essential": True},
+            "email_verified": {"essential": True},
+            "picture": None
+        },
+        "id_token": {
+            "gender": None,
+            "birthdate": {"essential": True}
+        }
+    }
+
+    def __init__(self, client_id, client_secret, redirect_uri, verify=False):
+        #self.session = session
+        self.verify = verify
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.redirect_uri = redirect_uri
+        self.resource_server = ResourceServer(client_id=client_id, client_secret=client_secret, verify=verify)
+
+    def auth_code(self, state, nonce, scopes=None, claims=None):
+        #application/x-www-form-urlencoded
+        #auth = HTTPBasicAuth(client_id, client_secret)
+
+        if not scopes:
+            scopes = self.default_scopes
+
+        if not claims:
+            claims = self.default_claims
+
+        params = {
+            'client_id': self.client_id,
+            'response_type': 'code',
+            'redirect_uri': self.redirect_uri,
+            'scope': ' '.join(scopes),
+            'state': state,
+            'nonce': nonce,
+            'claims': claims
+        }
+        #r = requests.get(url, verify=False, allow_redirects=False, params=params)
+        #return r
+        return self.auth_url + "?" + urllib.parse.urlencode(params)
+
+    def access_token(self, code):
+        #application/x-www-form-urlencoded
+        auth = HTTPBasicAuth(self.client_id, self.client_secret)
+        data = {
+            'client_id': self.client_id,
+            'grant_type': 'authorization_code',
+            'code': code,
+            'redirect_uri': self.redirect_uri
+        }
+        r = requests.post(self.token_url, verify=self.verify, allow_redirects=False, auth=auth, data=data)
+        return r
+
+    def userinfo(self, token):
+        headers = {
+            'Authorization': 'Bearer {}'.format(token),
+            'Accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+        r = requests.post(self.userinfo_url, verify=self.verify, allow_redirects=False, headers=headers)
+        if not r.ok:
+            return None
+        return r.json()
+
+
+    def register_in_flask(self, app, redirect='/oauth2'):
+        app.add_url_rule(redirect, 'oidc_callback', self.callback)
+
+    def callback(self):
+        data = flask.session.get(self.oidc_session, None)
+        if not data:
+            return ('Bad Request', 400)
+
+        redirect_after = data['redirect_after_login']
+
+        error = flask.request.args.get('error', None, str)
+        if error:
+            error_desc = flask.request.args.get('error_description', '', str)
+            return redirect(redirect_after, error=error, error_description=error_desc)
+
+        code = flask.request.args.get('code', None, str)
+        state = flask.request.args.get('state', None, str)
+
+        r = self.access_token(code)
+        if not r.ok:
+            logging.debug(r.text)
+            logging.debug(r.status_code)
+            logging.debug(r.headers.items())
+            return redirect(redirect_after, error=r.status_code, error_description=r.text)
+
+        token = r.json()
+        data['token'] = token
+        #flask.session[self.oidc_session] = json.dumps(data)
+        flask.session[self.oidc_session] = data
+        return redirect(redirect_after)
+
+        """
+        logging.debug(token)
+        token['access_token']
+        token['expires_in']
+        token['id_token']
+        token['refresh_token']
+        token['scope']
+        token['token_type']
+        """
+
+
+    def require_login(self, f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            data = flask.session.get(self.oidc_session, None)
+            if data:
+                #data = json.loads(data)
+                if 'token' in data:
+                    kwargs['token'] = data['token']
+                    return f(*args, **kwargs)
+
+            if not data:
+                data = {}
+
+            data['redirect_after_login'] = flask.request.path
+            flask.session[self.oidc_session] = data
+            r = self.auth_code(state=str(uuid.uuid4()), nonce=str(uuid.uuid4()), scopes=['openid', 'profile', 'email', 'address', 'phone', 'offline','hydra.clients'])
+            return redirect(r,302)
+
+        return decorated_function

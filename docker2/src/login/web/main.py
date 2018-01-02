@@ -21,6 +21,9 @@ import oauthlib
 import requests
 from requests.auth import HTTPBasicAuth
 
+from login.model import LoginModel
+
+
 #import urllib.parse
 
 # set the project root directory as the static folder, you can set others.
@@ -52,6 +55,7 @@ def obtener_token():
     r = requests.post(url, verify=False, auth=auth, headers=headers, data=data)
     return r.json()['access_token']
 
+
 def verificar_consent(token, consent_id):
     url = HYDRA_HOST + '/oauth2/consent/requests/' + consent_id
     headers = {
@@ -61,7 +65,6 @@ def verificar_consent(token, consent_id):
     }
     r = requests.get(url, verify=False, headers=headers, allow_redirects=False)
     return r
-
 
 
 def aceptar_consent(token, consent, usuario={'id':'sdfdsfs', 'name':'', 'email':'','email_verified':''}):
@@ -107,6 +110,7 @@ def aceptar_consent(token, consent, usuario={'id':'sdfdsfs', 'name':'', 'email':
 
     r = requests.patch(url, verify=False, allow_redirects=False, headers=headers, json=data)
     return r
+
 
 def denegar_consent(token, consent):
     url = HYDRA_HOST + '/oauth2/consent/requests/' + consent['id'] + '/reject'
@@ -177,6 +181,11 @@ def obtener_consent():
     return consent
 
 
+@app.route('/style.css', methods=['GET'])
+def get_style():
+    return send_from_directory(directory='style', filename='login.css')
+
+
 @app.route('/login', methods=['GET'])
 def login():
     ''' para los casos cuando hydra reporta un error '''
@@ -187,7 +196,7 @@ def login():
 
     consent_id = obtener_consent_id()
     if not consent_id:
-        return make_response('unauthorized', 401)
+        return render_template('login.html')
     flask.session['consent'] = consent_id
 
     usuario_id = flask.session.get('usuario_id',None)
@@ -200,10 +209,13 @@ def login():
 def do_login():
     usuario = request.form.get('usuario', None)
     clave = request.form.get('clave', None)
+
+    usuario_data = LoginModel.login(usuario, clave)
     #aca se debe chequear los datos de login y sino tirar error.
     #return render_template('login_ok.html', usuario=usuario)
-    flask.session['usuario_id'] = usuario
+    flask.session['usuario_id'] = usuario_data
     return redirect(url_for('authorize'), 303)
+
 
 @app.route('/authorize', methods=['GET'])
 def authorize():
