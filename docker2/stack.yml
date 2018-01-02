@@ -27,7 +27,7 @@ services:
       placement:
         constraints: [node.role == manager]
     dns:
-      - 192.168.0.3
+      - 163.10.56.57
     networks:
       - webnet
 
@@ -59,7 +59,7 @@ services:
       FORCE_ROOT_CLIENT_CREDENTIALS: admin:demo-password
       LOG_LEVEL: debug
     dns:
-      - 192.168.0.3
+      - 163.10.56.57
     networks:
       - webnet
 
@@ -75,7 +75,7 @@ services:
       HYDRA_CLIENT_ID: consent-app
       HYDRA_CLIENT_SECRET: consent-secret
     dns:
-      - 192.168.0.3
+      - 163.10.56.57
     networks:
       - webnet
 
@@ -92,7 +92,7 @@ services:
       HYDRA_CLIENT_ID: consent-app
       HYDRA_CLIENT_SECRET: consent-secret
     dns:
-      - 192.168.0.3
+      - 163.10.56.57
     networks:
       - webnet
 
