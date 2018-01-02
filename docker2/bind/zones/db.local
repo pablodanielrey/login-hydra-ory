@@ -13,7 +13,7 @@ $TTL	604800
 @	IN	A	127.0.0.1
 @	IN	AAAA	::1
 
-hydra   A   192.168.0.3
-consent A   192.168.0.3
-client  A   192.168.0.3
-usuarios	A	192.168.0.3
+hydra   A   163.10.56.57
+consent A   163.10.56.57
+client  A   163.10.56.57
+usuarios	A	163.10.56.57
