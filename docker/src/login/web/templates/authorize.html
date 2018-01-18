@@ -1,0 +1,14 @@
+<html>
+<body>
+  La Aplicación requiere acceso a<br>
+
+  {% for s in scopes %}
+    {{ s }} <br>
+  {% endfor %}
+
+  <form action='/authorize' method='POST'>
+    <button type='submit' name='auth' value='true'>Sí</button>
+    <button type='submit' name='auth' value='false'>No</button>
+  </form>
+</body>
+</html>
