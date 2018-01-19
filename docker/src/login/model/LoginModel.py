@@ -10,7 +10,7 @@ from .exceptions import *
 
 class LoginModel:
 
-    verify = False
+    verify = True
     USERS_API_URL = os.environ['USERS_API_URL']
 
     '''
@@ -34,6 +34,7 @@ class LoginModel:
         if r.status_code == 404:
             raise UsuarioNoEncontradoError()
 
+        raise LoginError()
 
     @classmethod
     def obtener_usuario(cls, uid):
