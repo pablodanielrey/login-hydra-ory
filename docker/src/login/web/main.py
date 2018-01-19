@@ -181,12 +181,12 @@ def obtener_consent():
     return consent
 
 
-@app.route('/staic/<path:path>', methods=['GET'])
+@app.route('/static/<path:path>', methods=['GET'])
 def get_style(path):
     return send_from_directory(directory='static', filename=path)
 
 
-@app.route('/login', methods=['GET'])
+@app.route('/', methods=['GET'])
 def login():
     ''' para los casos cuando hydra reporta un error '''
     error = request.args.get('error', None, str)
@@ -205,7 +205,7 @@ def login():
     return render_template('login.html')
 
 
-@app.route('/login', methods=['POST'])
+@app.route('/', methods=['POST'])
 def do_login():
     usuario = request.form.get('usuario', None)
     clave = request.form.get('clave', None)
@@ -271,7 +271,7 @@ def logout():
     return make_response('Logout successful!', 200, {'content_type':'text/html'})
 
 
-@app.route('/', methods=['GET'])
+@app.route('/user', methods=['GET'])
 @jsonapi
 def info():
     data = {
