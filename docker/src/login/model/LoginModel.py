@@ -26,7 +26,11 @@ class LoginModel:
         ''' se deben cheqeuar intentos de login, y disparar : SeguridadError en el caso de que se haya alcanzado el máximo de intentos '''
         r = requests.post(cls.USERS_API_URL + '/auth', verify=cls.verify, json={'usuario':usuario, 'clave':clave})
         if r.status_code == 200:
-            return r.json()
+            clave_data = r.json()
+            usuario_id = clave_data['usuario_id']
+            r = requests.get(cls.USERS_API_URL + '/usuarios/{}'.format(usuario_id), verify=cls.verify)
+            if r.status_code == 200:
+                return r.json()
 
         if r.status_code == 403:
             raise ClaveError()

@@ -130,13 +130,20 @@ def aceptar_consent(token, consent, usuario):
         data['idTokenExtra']['name'] = usuario['nombre'] + ' ' + usuario['apellido']
         data['idTokenExtra']['family_name'] = usuario['apellido']
         data['idTokenExtra']['given_name'] = usuario['nombre']
+        data['idTokenExtra']['username'] = usuario['dni']
         data['idTokenExtra']['preferred_username'] = usuario['dni']
         data['idTokenExtra']['zoneinfo'] = 'America/Argentina/Buenos_Aires'
         data['idTokenExtra']['locale'] = 'es-AR'
 
     if 'email' in consent['requestedScopes']:
-        data['idTokenExtra']['email'] = ''
-        data['idTokenExtra']['email_verified'] = True
+        for m in usuario['mails']:
+            data['idTokenExtra']['email'] = m['email']
+            data['idTokenExtra']['email_verified'] = m['confirmado'] != ''
+            if 'econo.unlp.edu.ar' in m['email']:
+                break
+
+    logging.debug('INFORMACION A RETORNAR:')
+    logging.debug(data)
 
     r = requests.patch(url, verify=VERIFY_SSL, allow_redirects=False, headers=headers, json=data)
     return r
@@ -265,6 +272,7 @@ def authorize():
     '''
 
     usuario = flask.session['usuario_id']
+    logging.debug(usuario)
     if not usuario:
         return make_response('No autorizado', 401)
 
@@ -277,7 +285,7 @@ def authorize():
             pass
 
     tk = obtener_token()
-    r = aceptar_consent(tk, consent)
+    r = aceptar_consent(tk, consent, usuario=usuario)
     if not r or not r.ok:
         return (r.text, r.status_code, r.headers.items())
     return redirect(consent['redirectUrl'])
