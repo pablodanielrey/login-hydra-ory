@@ -23,6 +23,37 @@ import flask
 from flask import redirect, url_for
 
 
+class ClientCredentialsGrant:
+    """
+        https://tools.ietf.org/html/rfc6749
+        sección 4.4
+    """
+    
+    verify = True
+    token_url = os.environ['HYDRA_HOST'] + '/oauth2/token'
+
+    def __init__(self, client_id, client_secret):
+        self.client_id = client_id
+        self.client_secret = client_secret
+
+    def access_token(self, scopes=[]):
+        auth = HTTPBasicAuth(self.client_id, self.client_secret)
+        data = {
+            'client_id': self.client_id,
+            'grant_type': 'client_credentials'
+        }
+        if len(scopes) > 0:
+            data['scope'] = ' '.join(scopes)
+
+        # application/x-www-form-urlencoded
+        r = requests.post(self.token_url, verify=self.verify, allow_redirects=False, auth=auth, data=data)
+        return r
+
+    def get_token(self, r):
+        if r.ok:
+            return r.json()['access_token']
+        return None
+
 
 class ResourceServer:
 
@@ -102,10 +133,6 @@ class ResourceServer:
                 'WWW-Authenticate': 'Basic realm=\"{}\"'.format(self.realm)
             }
         return (text, status, headers)
-
-
-
-
 
 
 class OIDC:

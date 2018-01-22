@@ -23,7 +23,6 @@ import flask
 from flask import redirect, url_for
 
 
-
 class ResourceServer:
 
     introspect_url = os.environ['HYDRA_HOST'] + '/oauth2/introspect'
@@ -179,7 +178,6 @@ class OIDC:
         if not r.ok:
             return None
         return r.json()
-
 
     def register_in_flask(self, app, redirect='/oauth2'):
         app.add_url_rule(redirect, 'oidc_callback', self.callback)
