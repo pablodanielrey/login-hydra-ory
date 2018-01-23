@@ -46,7 +46,7 @@ class LoginModel:
         if r.status_code == 200:
             clave_data = r.json()
             usuario_id = clave_data['usuario_id']
-            r = requests.get(cls.USERS_API_URL + '/usuarios/{}'.format(usuario_id), verify=cls.verify)
+            r = requests.get(cls.USERS_API_URL + '/usuarios/{}'.format(usuario_id), headers=headers, verify=cls.verify)
             if r.status_code == 200:
                 return r.json()
 
