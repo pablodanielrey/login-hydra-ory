@@ -17,8 +17,8 @@ class LoginModel:
 
     verify = True
     USERS_API_URL = os.environ['USERS_API_URL']
-    client_id = os.environ['HYDRA_CLIENT_ID']
-    client_secret = os.environ['HYDRA_CLIENT_SECRET']
+    client_id = os.environ['OIDC_CLIENT_ID']
+    client_secret = os.environ['OIDC_CLIENT_SECRET']
 
     '''
     @classmethod
