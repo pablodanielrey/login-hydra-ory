@@ -219,7 +219,7 @@ def obtener_consent():
 
 
 @app.route('/static/<path:path>', methods=['GET'])
-def get_style(path):
+def get_files(path):
     return send_from_directory(directory='static', filename=path)
 
 

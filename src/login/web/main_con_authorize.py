@@ -37,9 +37,9 @@ log = logging.getLogger()
 log.addHandler(logging.StreamHandler(sys.stdout))
 log.setLevel(logging.DEBUG)
 
-HYDRA_HOST = os.environ['OIDC_HOST']
-HYDRA_CLIENT_ID = os.environ['OIDC_CLIENT_ID']
-HYDRA_CLIENT_SECRET = os.environ['OIDC_CLIENT_SECRET']
+HYDRA_HOST = os.environ['HYDRA_HOST']
+HYDRA_CLIENT_ID = os.environ['HYDRA_CLIENT_ID']
+HYDRA_CLIENT_SECRET = os.environ['HYDRA_CLIENT_SECRET']
 
 def obtener_token():
     client_id = HYDRA_CLIENT_ID
@@ -68,49 +68,7 @@ def verificar_consent(token, consent_id):
     return r
 
 
-def aceptar_consent(token, consent, usuario):
-    '''
-        acepta el consent brindando la info pasada por usuario
-        de acuerdo a la especificación de openid connect
-
-        profile
-            OPTIONAL. This scope value requests access to the End-User's default profile Claims, which are:
-                name, family_name, given_name, middle_name, nickname, preferred_username, profile, picture, website, gender, birthdate, zoneinfo, locale, and updated_at.
-        email
-            OPTIONAL. This scope value requests access to the email and email_verified Claims.
-        address
-            OPTIONAL. This scope value requests access to the address Claim.
-        phone
-            OPTIONAL. This scope value requests access to the phone_number and phone_number_verified Claims.
-
-        info de ejemplo que se puede exportar:
-        data['idTokenExtra'] = {
-            'preferred_username': 'usuario@algo',
-            'name': usuario['name'],
-            'given_name': usuario['name'],
-            'family_name': usuario['name'],
-            'nickname': usuario['name'],
-            'picture': 'http://gravatar.com/imagen.jpg',
-            'gender': 'male',
-            'address': {
-                'formatted': 'calle 3 número 1232 depto 5, La Plata, Buenos Aires, Argentina',
-                'street_address': 'calle 3 número 1232 depto 5',
-                'locality': 'La Plata',
-                'region': 'Buenos Aires',
-                'postal_code': '1900',
-                'country': 'Argentina'
-            },
-            'birthdate': '1979-02-12',
-            'locale': 'es-AR',
-            'phone_number': '+1 (604) 555-1234;ext=5678',
-            'phone_number_verified': False,
-            'email':'algo@econo.unlp',
-            'email_verified':True,
-            'updated_at': 0
-        }
-    '''
-
-
+def aceptar_consent(token, consent, usuario={'id':'sdfdsfs', 'name':'', 'email':'','email_verified':''}):
     url = HYDRA_HOST + '/oauth2/consent/requests/' + consent['id'] + '/accept'
     headers = {
         'Authorization': 'bearer {}'.format(token),
@@ -121,29 +79,35 @@ def aceptar_consent(token, consent, usuario):
         'subject': usuario['id'],
         'grantScopes': consent['requestedScopes'],
         #'accessTokenExtra':  {}
-        'authTime': 0,
+        'authTime': 0
         #'providedAcr': 'algo',
-        'idTokenExtra': {}
     }
 
-    if 'profile' in consent['requestedScopes']:
-        data['idTokenExtra']['name'] = usuario['nombre'] + ' ' + usuario['apellido']
-        data['idTokenExtra']['family_name'] = usuario['apellido']
-        data['idTokenExtra']['given_name'] = usuario['nombre']
-        data['idTokenExtra']['username'] = usuario['dni']
-        data['idTokenExtra']['preferred_username'] = usuario['dni']
-        data['idTokenExtra']['zoneinfo'] = 'America/Argentina/Buenos_Aires'
-        data['idTokenExtra']['locale'] = 'es-AR'
-
-    if 'email' in consent['requestedScopes']:
-        for m in usuario['mails']:
-            data['idTokenExtra']['email'] = m['email']
-            data['idTokenExtra']['email_verified'] = m['confirmado'] != ''
-            if 'econo.unlp.edu.ar' in m['email']:
-                break
-
-    logging.debug('INFORMACION A RETORNAR:')
-    logging.debug(data)
+    ''' deberia chequear que scopes requirio y agregar los datos '''
+    data['idTokenExtra'] = {
+        'preferred_username': 'usuario@algo',
+        'name': usuario['name'],
+        'given_name': usuario['name'],
+        'family_name': usuario['name'],
+        'nickname': usuario['name'],
+        'picture': 'http://gravatar.com/imagen.jpg',
+        'gender': 'male',
+        'address': {
+            'formatted': 'calle 3 número 1232 depto 5, La Plata, Buenos Aires, Argentina',
+            'street_address': 'calle 3 número 1232 depto 5',
+            'locality': 'La Plata',
+            'region': 'Buenos Aires',
+            'postal_code': '1900',
+            'country': 'Argentina'
+        },
+        'birthdate': '1979-02-12',
+        'locale': 'es-AR',
+        'phone_number': '+1 (604) 555-1234;ext=5678',
+        'phone_number_verified': False,
+        'email':'algo@econo.unlp',
+        'email_verified':True,
+        'updated_at': 0
+    }
 
     r = requests.patch(url, verify=VERIFY_SSL, allow_redirects=False, headers=headers, json=data)
     return r
@@ -218,13 +182,12 @@ def obtener_consent():
     return consent
 
 
-@app.route('/img/<path:path>', methods=['GET'])
+@app.route('/static/<path:path>', methods=['GET'])
 def get_style(path):
-    return send_from_directory(directory='img', filename=path)
+    return send_from_directory(directory='static', filename=path)
 
 
 @app.route('/', methods=['GET'])
-@app.route('/login', methods=['GET'])
 def login():
     ''' para los casos cuando hydra reporta un error '''
     error = request.args.get('error', None, str)
@@ -244,7 +207,6 @@ def login():
 
 
 @app.route('/', methods=['POST'])
-@app.route('/login', methods=['POST'])
 def do_login():
     try:
         usuario = request.form.get('usuario', None)
@@ -257,12 +219,14 @@ def do_login():
         logging.exception(e)
         return render_template('error.html', error='Ocurrió un error', error_description='Por favor intente nuevamente')
 
-@app.route('/authorize', methods=['GET','POST'])
+@app.route('/authorize', methods=['GET'])
 def authorize():
+    consent = obtener_consent()
+    if not consent:
+        return make_response('No autorizado', 401)
+
     '''
-        autoriza automáticamente un pedido de consent.
-        arma la info retornada de usuarios en base a los scopes requeridos
-        TODO: debo analizar el consent y verificarlo o rechazarlo.
+        debo analizar el conset y verificarlo o rechazarlo.
         ej:
         {
             "id": "8dc077f1-4bd2-4f51-94f7-483e2a51aac8",
@@ -272,22 +236,29 @@ def authorize():
             "redirectUrl": "https://192.168.0.3:9000/oauth2/auth?client_id=consumer-test&response_type=code&redirect_uri=http%3A%2F%2F127.0.0.1%3A81%2Foauth2&scope=openid+offline+hydra.clients&state=algodealgo&consent=8dc077f1-4bd2-4f51-94f7-483e2a51aac8"
         }
     '''
+    if flask.session.get('autorizado', False):
+        tk = obtener_token()
+        r = aceptar_consent(tk, consent)
+        return redirect(consent['redirectUrl'])
+    else:
+        return render_template('authorize.html', scopes=consent['requestedScopes'])
 
-    usuario = flask.session['usuario_id']
-    logging.debug(usuario)
-    if not usuario:
-        return make_response('No autorizado', 401)
 
+@app.route('/authorize', methods=['POST'])
+def do_authorize():
     consent = obtener_consent()
     if not consent:
         return make_response('No autorizado', 401)
 
-    scopes = consent['requestedScopes']
-    for s in scopes:
-            pass
-
     tk = obtener_token()
-    r = aceptar_consent(tk, consent, usuario=usuario)
+    r = None
+    autorizado = request.form.get('auth', 'false', str)
+    if 'false' in autorizado:
+        r = denegar_consent(tk, consent)
+    else:
+        r = aceptar_consent(tk, consent)
+        flask.session['autorizado'] = True
+
     if not r or not r.ok:
         return (r.text, r.status_code, r.headers.items())
     return redirect(consent['redirectUrl'])
@@ -299,8 +270,7 @@ def logout():
         del flask.session['usuario_id']
     if 'autorizado' in flask.session:
         del flask.session['autorizado']
-    #return make_response('Logout successful!', 200, {'content_type':'text/html'})
-    return render_template('logout_ok.html')
+    return make_response('Logout successful!', 200, {'content_type':'text/html'})
 
 
 @app.route('/user', methods=['GET'])
@@ -312,6 +282,18 @@ def info():
     }
     return (data, 200)
 
+"""
+@app.route('/', methods=['GET'], defaults={'path':None})
+@app.route('/<path:path>', methods=['GET'])
+def send(path):
+    consent = flask.session.get('consent', None)
+    if not consent:
+        return HTTPResponse('unauthorized', content_type='text/html', status=401)
+
+    return redirect('/index.html'), 303
+
+    return send_from_directory(app.static_url_path, path)
+"""
 
 @app.after_request
 def add_header(r):

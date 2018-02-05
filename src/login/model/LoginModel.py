@@ -2,16 +2,23 @@ import uuid
 import datetime
 import base64
 import requests
+
 import logging
 import os
 import hashlib
+
+import oidc
+from oidc.oidc import ClientCredentialsGrant
+
 
 from .exceptions import *
 
 class LoginModel:
 
-    verify = False
+    verify = True
     USERS_API_URL = os.environ['USERS_API_URL']
+    client_id = os.environ['OIDC_CLIENT_ID']
+    client_secret = os.environ['OIDC_CLIENT_SECRET']
 
     '''
     @classmethod
@@ -23,10 +30,25 @@ class LoginModel:
 
     @classmethod
     def login(cls, usuario, clave):
+
+        ''' obtengo un token mediante el flujo client_credentials para poder llamar a la api de usuarios '''
+        grant = ClientCredentialsGrant(cls.client_id, cls.client_secret)
+        token = grant.get_token(grant.access_token())
+        if not token:
+            raise LoginError()
+
+
         ''' se deben cheqeuar intentos de login, y disparar : SeguridadError en el caso de que se haya alcanzado el máximo de intentos '''
-        r = requests.post(cls.USERS_API_URL + '/auth', verify=cls.verify, json={'usuario':usuario, 'clave':clave})
+        headers = {
+            'Authorization': 'Bearer {}'.format(token)
+        }
+        r = requests.post(cls.USERS_API_URL + '/auth', verify=cls.verify, headers=headers, json={'usuario':usuario, 'clave':clave})
         if r.status_code == 200:
-            return r.json()
+            clave_data = r.json()
+            usuario_id = clave_data['usuario_id']
+            r = requests.get(cls.USERS_API_URL + '/usuarios/{}'.format(usuario_id), headers=headers, verify=cls.verify)
+            if r.status_code == 200:
+                return r.json()
 
         if r.status_code == 403:
             raise ClaveError()
@@ -34,6 +56,7 @@ class LoginModel:
         if r.status_code == 404:
             raise UsuarioNoEncontradoError()
 
+        raise LoginError()
 
     @classmethod
     def obtener_usuario(cls, uid):
