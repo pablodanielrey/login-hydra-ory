@@ -36,9 +36,9 @@ log = logging.getLogger()
 log.addHandler(logging.StreamHandler(sys.stdout))
 log.setLevel(logging.DEBUG)
 
-HYDRA_HOST = os.environ['HYDRA_HOST']
-HYDRA_CLIENT_ID = os.environ['HYDRA_CLIENT_ID']
-HYDRA_CLIENT_SECRET = os.environ['HYDRA_CLIENT_SECRET']
+HYDRA_HOST = os.environ['OIDC_HOST']
+HYDRA_CLIENT_ID = os.environ['OIDC_CLIENT_ID']
+HYDRA_CLIENT_SECRET = os.environ['OIDC_CLIENT_SECRET']
 
 def obtener_token():
     client_id = HYDRA_CLIENT_ID
