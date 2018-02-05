@@ -36,6 +36,7 @@ log = logging.getLogger()
 log.addHandler(logging.StreamHandler(sys.stdout))
 log.setLevel(logging.DEBUG)
 
+VERIFY = True
 HYDRA_HOST = os.environ['OIDC_HOST']
 HYDRA_CLIENT_ID = os.environ['OIDC_CLIENT_ID']
 HYDRA_CLIENT_SECRET = os.environ['OIDC_CLIENT_SECRET']
@@ -52,7 +53,7 @@ def obtener_token():
         'Accept':'application/json'
     }
     url = HYDRA_HOST + '/oauth2/token'
-    r = requests.post(url, verify=False, auth=auth, headers=headers, data=data)
+    r = requests.post(url, verify=VERIFY, auth=auth, headers=headers, data=data)
     return r.json()['access_token']
 
 
@@ -63,7 +64,7 @@ def verificar_consent(token, consent_id):
         'Content-Type': 'application/json',
         'Accept': 'application/json'
     }
-    r = requests.get(url, verify=False, headers=headers, allow_redirects=False)
+    r = requests.get(url, verify=VERIFY, headers=headers, allow_redirects=False)
     return r
 
 
@@ -108,7 +109,7 @@ def aceptar_consent(token, consent, usuario={'id':'sdfdsfs', 'name':'', 'email':
         'updated_at': 0
     }
 
-    r = requests.patch(url, verify=False, allow_redirects=False, headers=headers, json=data)
+    r = requests.patch(url, verify=VERIFY, allow_redirects=False, headers=headers, json=data)
     return r
 
 
@@ -181,11 +182,12 @@ def obtener_consent():
     return consent
 
 
-@app.route('/staic/<path:path>', methods=['GET'])
+@app.route('/img/<path:path>', methods=['GET'])
 def get_style(path):
-    return send_from_directory(directory='static', filename=path)
+    return send_from_directory(directory='img', filename=path)
 
 
+@app.route('/', methods=['GET'])
 @app.route('/login', methods=['GET'])
 def login():
     ''' para los casos cuando hydra reporta un error '''
@@ -211,8 +213,7 @@ def do_login():
     clave = request.form.get('clave', None)
 
     usuario_data = LoginModel.login(usuario, clave)
-    #aca se debe chequear los datos de login y sino tirar error.
-    #return render_template('login_ok.html', usuario=usuario)
+    logging.debug('usuario logueado : {}'.format(usuario_data))
     flask.session['usuario_id'] = usuario_data
     return redirect(url_for('authorize'), 303)
 
@@ -234,12 +235,29 @@ def authorize():
             "redirectUrl": "https://192.168.0.3:9000/oauth2/auth?client_id=consumer-test&response_type=code&redirect_uri=http%3A%2F%2F127.0.0.1%3A81%2Foauth2&scope=openid+offline+hydra.clients&state=algodealgo&consent=8dc077f1-4bd2-4f51-94f7-483e2a51aac8"
         }
     '''
+
+    """
+    comento la parte de autorización ya que lo auto autorizamos.
+
     if flask.session.get('autorizado', False):
         tk = obtener_token()
         r = aceptar_consent(tk, consent)
         return redirect(consent['redirectUrl'])
     else:
         return render_template('authorize.html', scopes=consent['requestedScopes'])
+    """
+    usuario_data = flask.session.get('usuario_id',None)
+    logging.debug('información obtenida de la sesion: {}'.format(usuario_data))
+    if not usuario_data:
+        return make_response('No autorizado', 401)
+
+    ''' obtengo la info del usuario a aceptar '''
+    usuario = LoginModel.obtener_usuario(usuario_data['uid'])
+    logging.debug('información obtendia del usuario : {}'.format(usuario))
+
+    tk = obtener_token()
+    r = aceptar_consent(tk, consent, usuario=usuario)
+    return redirect(consent['redirectUrl'])
 
 
 @app.route('/authorize', methods=['POST'])
@@ -271,7 +289,7 @@ def logout():
     return make_response('Logout successful!', 200, {'content_type':'text/html'})
 
 
-@app.route('/', methods=['GET'])
+@app.route('/info', methods=['GET'])
 @jsonapi
 def info():
     data = {
@@ -280,18 +298,6 @@ def info():
     }
     return (data, 200)
 
-"""
-@app.route('/', methods=['GET'], defaults={'path':None})
-@app.route('/<path:path>', methods=['GET'])
-def send(path):
-    consent = flask.session.get('consent', None)
-    if not consent:
-        return HTTPResponse('unauthorized', content_type='text/html', status=401)
-
-    return redirect('/index.html'), 303
-
-    return send_from_directory(app.static_url_path, path)
-"""
 
 @app.after_request
 def add_header(r):
