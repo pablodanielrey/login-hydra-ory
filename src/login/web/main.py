@@ -300,7 +300,7 @@ def logout():
     if 'autorizado' in flask.session:
         del flask.session['autorizado']
     #return make_response('Logout successful!', 200, {'content_type':'text/html'})
-    return render_template('logout_ok.html')
+    return render_template('logout.html')
 
 
 @app.route('/user', methods=['GET'])

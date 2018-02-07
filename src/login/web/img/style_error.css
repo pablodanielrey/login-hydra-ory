@@ -1,5 +1,4 @@
 body {
-  background-image: url("img/imagen1.jpg");
   position: absolute;
   width: 100%;
   height: 100%;
@@ -8,6 +7,7 @@ body {
   display: -moz-flex;
   -webkit-align-items: center;
   -moz-align-items: center; */
+  background-image: url(imagen1.jpg);
 }
 
 .header {
@@ -24,7 +24,7 @@ body {
   padding-left: 20px;
 }
 
-.contenedorLogin {
+.contenedorErrorLogin {
   height: calc(100% - 70px);
   display: flex;
   display: -webkit-flex;
@@ -34,7 +34,7 @@ body {
   -moz-align-items: center;
 }
 
-.login {
+.errorlogin {
   border: 10px solid;
   border-color: rgba(255, 255, 255, 0.3);
   border-radius: 0.3em;
@@ -42,11 +42,18 @@ body {
   margin-left: 15%;
 }
 
-.loginContenedor {
+.errorLoginContenedor {
   width: 100%;
   height: 100%;
   padding: 20px;
   background-color: white;
+}
+
+.mensaje {
+    font-size: 20px;
+    color: #4285f4;
+    margin-top: 32px;
+    margin-bottom: 30px;
 }
 
 button {
@@ -55,7 +62,7 @@ button {
 
 
 
-.footerLogin {
+.footerErrorLogin {
     display: flex;
     display: -webkit-flex;
     display: -moz-flex;
@@ -93,13 +100,13 @@ button {
 }
 
 @media screen and (max-width: 718px) {
-  .contenedorLogin {
+  .contenedorErrorLogin {
     background-color: white;
     align-items:start;
     -webkit-align-items: start;
     -moz-align-items: start;
   }
-  .login {
+  .errorlogin {
     width: 100%;
     margin-left: 0px;
   }
