@@ -7,7 +7,7 @@ body {
   display: -moz-flex;
   -webkit-align-items: center;
   -moz-align-items: center; */
-  background-image: url("img/imagen1.jpg");
+  background-image: url("imagen1.jpg");
 }
 
 .header {
