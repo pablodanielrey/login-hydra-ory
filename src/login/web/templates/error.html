@@ -16,6 +16,11 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 -->
 
+<script>
+  function volver() {
+      window.history.back();
+  }
+</script>
 
 </head>
 
@@ -33,7 +38,7 @@
                     <div class="mensaje">
                       Los datos ingresados son incorrectos.
                     </div>
-                    <button type="submit" class="btn btn-primary ">Volver</button>
+                    <button type="submit" onclick='volver()' class="btn btn-primary ">Volver</button>
                 </div><hr>
                 <div class="footerErrorLogin">
                   <div>
