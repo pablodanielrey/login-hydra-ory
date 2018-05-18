@@ -38,7 +38,8 @@ setup(name='login-consent',
                             'pyjwt',
                             'oauthlib',
                             'cryptography',
-                            'requests_oauthlib'
+                            'requests_oauthlib',
+                            'microservices_common'
                             ],
           entry_points={
             'console_scripts': [

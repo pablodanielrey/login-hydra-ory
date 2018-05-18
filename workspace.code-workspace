@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "/src/github/microservices_common"
+		},
+		{
+			"path": "/src/github/users-api"
+		},
+		{
+			"path": "/src/temporales/hydra"
+		}
+	],
+	"settings": {
+		"python.pythonPath": "${workspaceFolder}/env/bin/python"
+	}
+}

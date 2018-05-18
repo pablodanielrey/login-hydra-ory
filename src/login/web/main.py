@@ -10,6 +10,8 @@ logging.getLogger().propagate = True
 #logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 #logging.basicConfig(level=logging.DEBUG)
 
+import datetime
+
 import flask
 from flask import Flask, request, send_from_directory, jsonify, redirect, session, url_for, make_response, render_template
 from flask_jsontools import jsonapi
@@ -29,9 +31,7 @@ VERIFY_SSL=True
 
 # set the project root directory as the static folder, you can set others.
 app = Flask(__name__, static_url_path='/src/login/web')
-app.debug = True
-#app.config['SECRET_KEY'] = 'algo-secreto2'
-#app.config['SESSION_COOKIE_NAME'] = 'oidc_session'
+app.debug = False
 import sys
 log = logging.getLogger()
 log.addHandler(logging.StreamHandler(sys.stdout))
@@ -41,7 +41,60 @@ HYDRA_HOST = os.environ['OIDC_HOST']
 HYDRA_CLIENT_ID = os.environ['OIDC_CLIENT_ID']
 HYDRA_CLIENT_SECRET = os.environ['OIDC_CLIENT_SECRET']
 
+"""
+    configuro la sesion de flask
+"""
+import hashlib
+app.config['SECRET_KEY'] = hashlib.sha1(HYDRA_CLIENT_SECRET.encode('utf-8')).hexdigest()
+
+app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(days=365)
+app.config['SESSION_COOKIE_SECURE'] = False
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_PATH'] = '/'
+#app.config['SESSION_COOKIE_DOMAIN'] = app.config.get('SERVER_NAME')
+app.config['SESSION_COOKIE_NAME'] = 'consent_oidc_session'
+
+""" extensiones de Flask_session """
+app.config['SESSION_PERMANENT'] = True
+app.config['SESSION_USE_SIGNER'] = True
+app.config['SESSION_KEY_PREFIX'] = 'consent_'
+
+use_redis = os.environ.get('FLASK_SESSION_REDIS',False)
+if use_redis and use_redis not in ("False","false","0"):
+    logging.debug('configurando para usar redis como backend de sesiones')
+    REDIS_HOST = os.environ['REDIS_HOST']
+    r = redis.StrictRedis(host=REDIS_HOST, port=6379, db=0)
+    app.config['SESSION_TYPE'] = 'redis'
+    app.config['SESSION_REDIS'] = r
+else:
+    logging.debug('configurando el filesystem como backend de sesiones')
+    app.config['SESSION_TYPE'] = 'filesystem'
+    app.config['SESSION_FILE_DIR'] = '/tmp/flask_sessions'
+    app.config['SESSION_FILE_THRESHOLD'] = 500
+    app.config['SESSION_FILE_MODE'] = 777
+
+
+flask_session.Session(app)
+
+
+def _token_expired(tk):
+    """ chequea que el token no esté expirado """
+    if 'expires_aux' not in tk:
+        return True
+    actual = datetime.datetime.now().timestamp()
+    return tk['expires_aux'] >= actual
+
+def _token_set_expired(tk):
+    """ calcula en timestamp la expiración + xx segundos de marjen """
+    tk['expires_aux'] = datetime.datetime.now().timestamp() + tk['expires_in'] - 60
+
+
 def obtener_token():
+    TOKEN_S_ID = 'consent_token'
+    token = flask.session.get(TOKEN_S_ID, None)
+    if token and not _token_expired(token):
+        return token['access_token']
+        
     client_id = HYDRA_CLIENT_ID
     client_secret = HYDRA_CLIENT_SECRET
     auth = HTTPBasicAuth(client_id, client_secret)
@@ -54,10 +107,17 @@ def obtener_token():
     }
     url = HYDRA_HOST + '/oauth2/token'
     r = requests.post(url, verify=VERIFY_SSL, auth=auth, headers=headers, data=data)
-    return r.json()['access_token']
+    if not r.ok:
+        raise Exception('no se pudo obtener un token para acceso a hydra')
+    
+    token = r.json()
+    _token_set_expired(token)
+    flask.session[TOKEN_S_ID] = token
+    return token['access_token']
 
 
-def verificar_consent(token, consent_id):
+
+def obtener_consent(token, consent_id):
     url = HYDRA_HOST + '/oauth2/consent/requests/' + consent_id
     headers = {
         'Authorization': 'bearer {}'.format(token),
@@ -65,7 +125,9 @@ def verificar_consent(token, consent_id):
         'Accept': 'application/json'
     }
     r = requests.get(url, verify=VERIFY_SSL, headers=headers, allow_redirects=False)
-    return r
+    if not r.ok:
+        return None
+    return r.json()
 
 
 def aceptar_consent(token, consent, usuario):
@@ -168,56 +230,6 @@ def denegar_consent(token, consent):
     return r
 
 
-"""
-def obtener_token():
-    #https://requests-oauthlib.readthedocs.io/en/latest/oauth2_workflow.html#backend-application-flow
-    from oauthlib.oauth2 import BackendApplicationClient
-    from requests_oauthlib import OAuth2Session
-    from requests.auth import HTTPBasicAuth
-
-    client_id = HYDRA_CLIENT_ID
-    client_secret = HYDRA_CLIENT_SECRET
-    scopes = ['hydra.consent']
-
-    auth = HTTPBasicAuth(client_id, client_secret)
-    client = BackendApplicationClient(client_id=client_id)
-    oauth = OAuth2Session(client=client, scope=scopes)
-    token = oauth.fetch_token(token_url=HYDRA_HOST + '/oauth2/token', auth=auth, verify=False)
-    return oauth, token
-"""
-
-REDIS_HOST = os.environ['REDIS_HOST']
-r = redis.StrictRedis(host=REDIS_HOST, port=6379, db=0)
-app.config['SESSION_TYPE'] = 'redis'
-app.config['SESSION_REDIS'] = r
-flask_session.Session(app)
-
-
-def obtener_consent_id():
-    consent = request.args.get('consent', None, str)
-    if not consent:
-        consent = flask.session.get('consent', None)
-    return consent
-
-def obtener_consent():
-    id = obtener_consent_id()
-    if not id:
-        return None
-
-    consent = flask.session.get('consent_{}'.format(id), None)
-    if consent:
-        return consent
-
-    tk = obtener_token()
-    r = verificar_consent(tk, id)
-    if not r.ok:
-        return None
-
-    consent = r.json()
-    flask.session['consent_{}'.format(id)] = consent
-    return consent
-
-
 @app.route('/img/<path:path>', methods=['GET'])
 def get_style(path):
     return send_from_directory(directory='img', filename=path)
@@ -226,38 +238,42 @@ def get_style(path):
 @app.route('/', methods=['GET'])
 @app.route('/login', methods=['GET'])
 def login():
+    """
     ''' para los casos cuando hydra reporta un error '''
     error = request.args.get('error', None, str)
     if error:
         descripcion = request.args.get('error_description', '', str)
         return render_template('error.html', error=error, descripcion=descripcion)
+    """
 
-    consent_id = obtener_consent_id()
+    consent_id = request.args.get('consent', None, str)
     if not consent_id:
-        return render_template('login.html')
-    flask.session['consent'] = consent_id
+        return render_template('error.html', error='No permitido', descripcion='Ingrese al sistema adecuado')
+    flask.session['consent_id'] = consent_id
 
-    usuario_id = flask.session.get('usuario_id',None)
+    usuario_id = flask.session.get('usuario',None)
     if usuario_id:
         return redirect(url_for('authorize'), 303)
     return render_template('login.html')
 
-
 @app.route('/', methods=['POST'])
 @app.route('/login', methods=['POST'])
 def do_login():
-    try:
-        usuario = request.form.get('usuario', None)
-        clave = request.form.get('clave', None)
-        usuario_data = LoginModel.login(usuario, clave)
-        flask.session['usuario_id'] = usuario_data
-        return redirect(url_for('authorize'), 303)
+    consent_id = flask.session['consent_id']
+    if not consent_id:
+        return 'Bad Request', 400
 
-    except Exception as e:
-        logging.exception(e)
-        return render_template('error.html', error='Ocurrió un error', error_description='Por favor intente nuevamente')
+    usuario = request.form.get('usuario', None)
+    clave = request.form.get('clave', None)
+    if not usuario or not clave:
+        return 'Bad Request', 400
 
-@app.route('/authorize', methods=['GET','POST'])
+    usuario_data = LoginModel.login(usuario, clave)
+    flask.session['usuario'] = usuario_data
+
+    return redirect(url_for('authorize'), 303)
+
+@app.route('/authorize', methods=['GET'])
 def authorize():
     '''
         autoriza automáticamente un pedido de consent.
@@ -272,22 +288,30 @@ def authorize():
             "redirectUrl": "https://192.168.0.3:9000/oauth2/auth?client_id=consumer-test&response_type=code&redirect_uri=http%3A%2F%2F127.0.0.1%3A81%2Foauth2&scope=openid+offline+hydra.clients&state=algodealgo&consent=8dc077f1-4bd2-4f51-94f7-483e2a51aac8"
         }
     '''
-
-    usuario = flask.session['usuario_id']
-    logging.debug(usuario)
+    usuario = flask.session['usuario']
     if not usuario:
-        return make_response('No autorizado', 401)
+        return 'Bad Request', 400
 
-    consent = obtener_consent()
+    consent_id = flask.session['consent_id']
+    if not consent_id:
+        return 'Bad Request', 400
+    
+    tk = obtener_token()
+    consent = obtener_consent(tk, consent_id)
     if not consent:
-        return make_response('No autorizado', 401)
+        return redirect(url_for('login'), 303)
 
-    scopes = consent['requestedScopes']
-    for s in scopes:
-            pass
+    """ 
+        debería chequear los scopes, etc 
+        pero por ahora lo autorizo implícitamente
+    """
 
     tk = obtener_token()
     r = aceptar_consent(tk, consent, usuario=usuario)
+
+    if 'consent_id' in flask.session:
+        del flask.session['consent_id']
+
     if not r or not r.ok:
         return (r.text, r.status_code, r.headers.items())
     return redirect(consent['redirectUrl'])
