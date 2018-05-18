@@ -82,7 +82,7 @@ def _token_expired(tk):
     if 'expires_aux' not in tk:
         return True
     actual = datetime.datetime.now().timestamp()
-    return tk['expires_aux'] >= actual
+    return tk['expires_aux'] <= actual
 
 def _token_set_expired(tk):
     """ calcula en timestamp la expiración + xx segundos de marjen """
