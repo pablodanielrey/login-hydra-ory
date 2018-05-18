@@ -319,11 +319,15 @@ def authorize():
 
 @app.route('/logout')
 def logout():
-    if 'usuario_id' in flask.session:
-        del flask.session['usuario_id']
-    if 'autorizado' in flask.session:
-        del flask.session['autorizado']
-    #return make_response('Logout successful!', 200, {'content_type':'text/html'})
+    if 'usuario' in flask.session:
+        del flask.session['usuario']
+
+    if 'consent_id' in flask.session:
+        del flask.session['consent_id']
+
+    redirect_uri = request.args.get('post_logout_redirect_uri')
+    if redirect_uri:
+        return redirect(redirect_uri)
     return render_template('logout.html')
 
 
