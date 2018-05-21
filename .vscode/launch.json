@@ -5,7 +5,11 @@
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "program": "${file}"
+            "program": "${file}",
+            "env": {
+                "LC_ALL": "es_AR.utf-8",
+                "LANG": "es_AR.utf-8"                
+            }
         },        
         {
             "name": "Python: Flask (0.11.x or later)",
