@@ -11,6 +11,12 @@
 		},
 		{
 			"path": "/src/temporales/hydra"
+		},
+		{
+			"path": "/src/temporales/angular-oauth2-oidc"
+		},
+		{
+			"path": "/src/gitlab/stacks"
 		}
 	],
 	"settings": {
