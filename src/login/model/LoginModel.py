@@ -49,7 +49,8 @@ class LoginModel:
             r = requests.get(cls.USERS_API_URL + '/usuarios/{}'.format(usuario_id), headers=headers, verify=cls.verify)
             if r.status_code == 200:
                 return r.json()
-
+        logging.debug(r)
+        
         if r.status_code == 403:
             raise ClaveError()
 

@@ -12,7 +12,7 @@
 from setuptools import setup, find_packages
 
 setup(name='login-consent',
-          version='1.0.0.alpha0',
+          version='1.0.0.alpha1',
           description='Aplicación de consent para hydra-ory',
           url='https://github.com/pablodanielrey/login-hydra-ory',
           author='Desarrollo DiTeSi, FCE',
@@ -39,11 +39,12 @@ setup(name='login-consent',
                             'oauthlib',
                             'cryptography',
                             'requests_oauthlib',
-                            'microservices_common'
+                            'microservices_common',
+                            'gunicorn'
                             ],
           entry_points={
             'console_scripts': [
-                'flask=login.web.main:main'
+                'flask=login.web.wsgi:main'
             ]
           }
 
