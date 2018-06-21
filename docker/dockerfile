@@ -1,5 +1,7 @@
 FROM python:3.6.2-stretch
 
+RUN pip install --upgrade pip
+
 RUN apt-get update && apt-get install -y \
   postgresql-server-dev-all \
   supervisor \
@@ -18,7 +20,7 @@ RUN cd /src && pip3 install --trusted-host pypi.econo.unlp.edu.ar --upgrade -e .
 
 
 ### debe haber ejecutado antes descargar-node.sh ####
-ENV ARCH x64
+#ENV ARCH x64
 
 #ENV NODE_VERSION 9.2.0
 #COPY node/node-v$NODE_VERSION-linux-$ARCH.tar.xz /root/
@@ -33,7 +35,7 @@ ENV ARCH x64
 #  && ln -s /opt/yarn/bin/yarn /usr/local/bin/yarnpkg
 #  ############################################
 
-EXPOSE 5000
+#EXPOSE 5000
 
 WORKDIR /src
 
