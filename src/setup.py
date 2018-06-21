@@ -44,7 +44,7 @@ setup(name='login-consent',
                             ],
           entry_points={
             'console_scripts': [
-                'flask=login.web.wsgi:main'
+                'flask=login.web.main:main'
             ]
           }
 
