@@ -15,7 +15,7 @@ from .exceptions import *
 
 class LoginModel:
 
-    verify = True
+    verify = bool(os.environ.get('VERIFY_SSL', True))
     USERS_API_URL = os.environ['USERS_API_URL']
     client_id = os.environ['OIDC_CLIENT_ID']
     client_secret = os.environ['OIDC_CLIENT_SECRET']

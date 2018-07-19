@@ -14,6 +14,8 @@ import requests
 
 from oidc import OIDC, ResourceServer
 
+VERIFY_SSL = bool(os.environ.get('VERIFY_SSL', True))
+
 # set the project root directory as the static folder, you can set others.
 app = Flask(__name__, static_url_path='/src/users/web')
 app.debug = True
@@ -26,7 +28,7 @@ app.config['SESSION_TYPE'] = 'redis'
 app.config['SESSION_REDIS'] = r
 flask_session.Session(app)
 
-oidc = OIDC(client_id='consumer-test', client_secret='consumer-secret', redirect_uri='https://client.dominio/oauth2')
+oidc = OIDC(client_id='consumer-test', client_secret='consumer-secret', redirect_uri='https://client.dominio/oauth2', verify=VERIFY_SSL)
 oidc.register_in_flask(app, '/oauth2')
 
 

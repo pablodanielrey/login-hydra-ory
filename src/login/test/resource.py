@@ -11,13 +11,15 @@ import requests
 
 from oidc import OIDC, ResourceServer
 
+VERIFY_SSL = bool(os.environ.get('VERIFY_SSL', True))
+
 # set the project root directory as the static folder, you can set others.
 app = Flask(__name__, static_url_path='/src/users/web')
 app.debug = True
 app.config['SECRET_KEY'] = 'algo-secreto'
 app.config['SESSION_COOKIE_NAME'] = 'users_session'
 
-rs = ResourceServer('consumer-test','consumer-secret', 'resource server test')
+rs = ResourceServer(client_id='consumer-test', client_secret='consumer-secret', realm='resource server test', verify=VERIFY_SSL)
 
 import json
 

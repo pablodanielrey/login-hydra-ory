@@ -23,7 +23,7 @@ from requests.auth import HTTPBasicAuth
 
 from login.model import LoginModel
 
-VERIFY_SSL=True
+VERIFY_SSL = bool(os.environ.get('VERIFY_SSL', True))
 
 #import urllib.parse
 
