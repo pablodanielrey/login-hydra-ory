@@ -32,7 +32,7 @@ class LoginModel:
     def login(cls, usuario, clave):
 
         ''' obtengo un token mediante el flujo client_credentials para poder llamar a la api de usuarios '''
-        grant = ClientCredentialsGrant(cls.client_id, cls.client_secret)
+        grant = ClientCredentialsGrant(cls.client_id, cls.client_secret, verify=cls.verify)
         token = grant.get_token(grant.access_token())
         if not token:
             raise LoginError()
