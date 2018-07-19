@@ -14,7 +14,7 @@ import requests
 
 from oidc import OIDC, ResourceServer
 
-VERIFY_SSL = bool(os.environ.get('VERIFY_SSL', True))
+VERIFY_SSL = bool(int(os.environ.get('VERIFY_SSL', 1)))
 
 # set the project root directory as the static folder, you can set others.
 app = Flask(__name__, static_url_path='/src/users/web')
