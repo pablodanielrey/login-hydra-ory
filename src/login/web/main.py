@@ -234,6 +234,10 @@ def denegar_consent(token, consent):
 def get_style(path):
     return send_from_directory(directory='img', filename=path)
 
+@app.route('/css/<path:path>', methods=['GET'])
+def get_style(path):
+    return send_from_directory(directory='css', filename=path)
+
 
 @app.route('/', methods=['GET'])
 @app.route('/login', methods=['GET'])
